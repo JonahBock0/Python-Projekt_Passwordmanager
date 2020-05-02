@@ -3,11 +3,8 @@ def entries_from_string(from_string):
 
 
 class Manager:
-    def __init__(self):
-        self.entries = []
-
-    # def __init__(self, from_string):
-    #    self.entries = entries_from_string(from_string)
+    def __init__(self, from_string=None):
+        self.entries = entries_from_string(from_string) if from_string else []
 
     def to_string(self):
         return ""
