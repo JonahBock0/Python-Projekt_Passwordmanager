@@ -1,5 +1,5 @@
-import getpass
 from passwordmanager.manager import Manager
+
 
 def Untermenü(manager):
     auswahl = int(input('Untermenü:\nWählen Sie eine der folgenden Funktionen:\
@@ -48,5 +48,6 @@ def cli():
     # Neue "Datenbank" erstellen oder einlesen
     manager = Manager()
     menu(manager)
+
 
 cli()
