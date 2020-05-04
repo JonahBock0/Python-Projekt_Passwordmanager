@@ -30,4 +30,4 @@ class Entry:
             attributes.append(f"{key}\n{val}")
         attributes_string = "\n".join(attributes)
         string = f"{self.name}\n{self.user}\n{self.password}\n{notes_lines}\n{self.notes}\n{attributes_string}"
-        return string, string.count("\n") + 1
+        return string
