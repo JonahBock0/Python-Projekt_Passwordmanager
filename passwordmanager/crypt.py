@@ -1,14 +1,29 @@
 import base64
 import os
+
+from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.fernet import Fernet
+
+
+def get_or_create_salt(size: int, filename: str = "passwordmanager.salt"):
+    try:
+        salt_file = open(filename, "rb")
+        salt = salt_file.read()
+        salt_file.close()
+        return salt
+    except FileNotFoundError:
+        salt_file = open(filename, "wb")
+        salt = os.urandom(size)
+        salt_file.write(salt)
+        salt_file.close()
+        return salt
 
 
 def generate_key(password: str):
     password_byte = password.encode()
-    salt = os.urandom(16)
+    salt = get_or_create_salt(16)
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
