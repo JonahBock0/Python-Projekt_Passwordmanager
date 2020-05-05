@@ -1,31 +1,42 @@
 from passwordmanager.manager import Manager
 
 
-def Untermenü(manager):
-    auswahl = int(input('''Untermenü:
+def Untermenü(manager, entry):
+    auswahl = int(input(f'''{entry.name}
+Untermenü:
 Wählen Sie eine der folgenden Funktionen:
-    1. Eintrag bearbeiten
-    2. Eintrag löschen
-    3. zurück ins Hauptmenü
+    1. Namen bearbeiten
+    2. Benutzer bearbeiten
+    3. Passwort bearbeiten
+    4. Notizen bearbeiten
+    5. Attribute bearbeiten
+    6. zurück ins Hauptmenü
 Ihre Eingabe: '''))
-    if auswahl == 3:
+
+    if auswahl == 6:
         return
     funktionen = {1: Eintrag_bearbeiten, 2: Eintrag_löschen}
     funktion = funktionen.get(auswahl, fehler)
     funktion(manager)
 
 
-def Eintrag_löschen(manager):
+def edit_user(manager, entry):
+    print(entry.name)
+
+
+def Eintrag_löschen(manager, entry):
     print('Eintrag löschen:\n')
+    manager.remove_entry(entry)
 
 
-def Eintrag_bearbeiten(manager):
+def Eintrag_bearbeiten(manager, entry):
     print('Eintrag_bearbeiten\n')
 
 
 def Eintrag_hinzufügen(manager):
-    print('Eintrag hinzufügen:n')
+    print('Eintrag hinzufügen:\n')
     Untermenü(manager)
+    manager.
 
 
 def Eintrag_anzeigen(manager):
@@ -54,7 +65,15 @@ Ihre Eingabe: '''))
 
 
 def cli():
-    # Neue "Datenbank" erstellen oder einlesen
+    auswahl = int(input('''Wählen Sie aus Folgendem:
+    1. Neuen Datenbank erstellen
+    2. Datenbank öffnen
+Ihre Eingabe: '''))
+    if auswahl == 1:
+        pass
+    if auswahl == 2:
+        pass
+
     manager = Manager()
     menu(manager)
 
