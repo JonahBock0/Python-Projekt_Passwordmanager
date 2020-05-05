@@ -1,6 +1,6 @@
-from passwordmanager.crypt import generate_key, decrypt
+from passwordmanager.crypt import generate_key, decrypt, encrypt
 from passwordmanager.entry import Entry
-from passwordmanager.files import read_file
+from passwordmanager.files import read_file, write_file
 
 
 def entries_from_string(from_string: str):
@@ -45,3 +45,9 @@ def open_manager_from_file(filename: str, key: bytes = None, password: str = Non
     if password and not key:
         key = generate_key(password)
     return Manager(decrypt(read_file(filename), key))
+
+
+def save_manager_to_file(manager: Manager = Manager(), filename: str = None, key: bytes = None, password: str = None):
+    if password and not key:
+        key = generate_key(password)
+    write_file(filename, encrypt(manager.to_string(), key))
