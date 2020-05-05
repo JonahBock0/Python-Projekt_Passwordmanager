@@ -6,18 +6,15 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+from passwordmanager.files import read_file, write_file
+
 
 def get_or_create_salt(size: int, filename: str = "passwordmanager.salt") -> bytes:
     try:
-        salt_file = open(filename, "rb")
-        salt = salt_file.read()
-        salt_file.close()
-        return salt
+        return read_file(filename, "rb")
     except FileNotFoundError:
-        salt_file = open(filename, "wb")
         salt = urandom(size)
-        salt_file.write(salt)
-        salt_file.close()
+        write_file(filename, salt, "wb")
         return salt
 
 
