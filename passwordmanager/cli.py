@@ -2,8 +2,12 @@ from passwordmanager.manager import Manager
 
 
 def Untermenü(manager):
-    auswahl = int(input('Untermenü:\nWählen Sie eine der folgenden Funktionen:\
-                 \n\n\t1. Eintrag bearbeiten\n\t2. Eintrag löschen\n\t3. zurück ins Hauptmenü\n\nIhre Eingabe: '))
+    auswahl = int(input('''Untermenü:
+Wählen Sie eine der folgenden Funktionen:
+    1. Eintrag bearbeiten
+    2. Eintrag löschen
+    3. zurück ins Hauptmenü
+Ihre Eingabe: '''))
     if auswahl == 3:
         return
     funktionen = {1: Eintrag_bearbeiten, 2: Eintrag_löschen}
@@ -35,8 +39,13 @@ def fehler(manager):
 
 def menu(manager):
     while True:
-        auswahl = int(input('Willkommen im Passwordmanager\n\nHauptmenü:\nWählen Sie eine der folgenden Funktionen:\
-                                \n\n\t\t1. Eintrag hinzufügen\n\t\t2. Eintrag anzeigen\n\t\t3. Programm verlassen\n\nIhre Eingabe: '))
+        auswahl = int(input('''Willkommen im Passwordmanager
+Hauptmenü:
+Wählen Sie eine der folgenden Funktionen:
+    1. Eintrag hinzufügen
+    2. Eintrag anzeigen
+    3. Programm verlassen
+Ihre Eingabe: '''))
         if auswahl == 3:
             break
         funktionen = {1: Eintrag_hinzufügen, 2: Eintrag_anzeigen}
