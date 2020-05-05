@@ -15,22 +15,25 @@ def entries_from_string(from_string: str):
 
 class Manager:
     def __init__(self, from_string: str = None):
-        self.entries = entries_from_string(from_string) if from_string else []
+        self._entries = entries_from_string(from_string) if from_string else []
 
     def to_string(self) -> str:
         line_nums = []
         lines = []
-        for entry in self.entries:
+        for entry in self._entries:
             string = entry.to_string()
             lines.append(string)
             line_nums.append(str(string.count("\n") + 1))
         return ','.join(line_nums) + "\n" + "\n".join(lines)
 
     def add_entry(self, entry):
-        self.entries.append(entry)
+        self._entries.append(entry)
 
     def remove_entry(self, entry):
-        self.entries.remove(entry)
+        self._entries.remove(entry)
 
     def find_entries(self, search):
-        return list(filter(lambda e: search in e.name, self.entries))
+        return list(filter(lambda e: search in e.name, self._entries))
+
+    def get_entries(self):
+        return self._entries[:]
