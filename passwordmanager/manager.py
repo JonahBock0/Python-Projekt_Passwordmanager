@@ -1,4 +1,6 @@
+from passwordmanager.crypt import generate_key, decrypt
 from passwordmanager.entry import Entry
+from passwordmanager.files import read_file
 
 
 def entries_from_string(from_string: str):
@@ -37,3 +39,9 @@ class Manager:
 
     def get_entries(self):
         return self._entries[:]
+
+
+def open_manager_from_file(filename: str, key: bytes = None, password: str = None) -> Manager:
+    if password and not key:
+        key = generate_key(password)
+    return Manager(decrypt(read_file(filename), key))
