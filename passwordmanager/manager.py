@@ -25,3 +25,12 @@ class Manager:
             lines.append(string)
             line_nums.append(str(string.count("\n") + 1))
         return ','.join(line_nums) + "\n" + "\n".join(lines)
+
+    def add_entry(self, entry):
+        self.entries.append(entry)
+
+    def remove_entry(self, entry):
+        self.entries.remove(entry)
+
+    def find_entries(self, search):
+        return list(filter(lambda e: search in e.name, self.entries))
