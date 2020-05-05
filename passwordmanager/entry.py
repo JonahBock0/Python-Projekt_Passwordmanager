@@ -23,7 +23,7 @@ class Entry:
             self.notes = ""
             self.attributes = dict()
 
-    def to_string(self):
+    def to_string(self) -> str:
         notes_lines = self.notes.count("\n") + 1
         attributes = []
         for key, val in self.attributes.items():

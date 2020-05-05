@@ -1,10 +1,9 @@
-import secrets
 import string
+from secrets import choice
 
 
-def generate_password(length: int,
-                      letters: bool = True, digits: bool = True, punctuation: bool = True, space: bool = True,
-                      exclude: str = ""):
+def generate_password(length: int, exclude: str = "",
+                      letters: bool = True, digits: bool = True, punctuation: bool = True, space: bool = True) -> str:
     password_chars = ' ' if space else ''
     if letters:
         password_chars += string.ascii_letters
@@ -14,8 +13,7 @@ def generate_password(length: int,
         password_chars += string.punctuation
     for c in exclude:
         password_chars = password_chars.replace(c, '')
-    print(password_chars)
     password = ""
     for i in range(length):
-        password += secrets.choice(password_chars)
+        password += choice(password_chars)
     return password
