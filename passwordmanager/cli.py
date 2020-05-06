@@ -1,5 +1,8 @@
+from getpass import getpass
+
+from passwordmanager.crypt import generate_key
 from passwordmanager.entry import Entry
-from passwordmanager.manager import Manager
+from passwordmanager.manager import Manager, save_manager_to_file, open_manager_from_file
 
 
 def entry_menu(manager, entry):
@@ -111,14 +114,22 @@ Ihre Eingabe: ''')
 
 
 def cli():
-    auswahl = input_int('''Wählen Sie aus Folgendem:
-    1. Neuen Datenbank erstellen
+    auswahl = 0
+    while auswahl not in [1, 2, 3]:
+        auswahl = input_int('''Wählen Sie aus Folgendem:
+    1. Neue Datenbank erstellen
     2. Datenbank öffnen
+    3. Beenden
 Ihre Eingabe: ''')
+    if auswahl == 3:
+        return
+    filename = input("Dateiname/Pfad: ")
+    key = generate_key(getpass("Passwort: "))
+    manager = None
     if auswahl == 1:
-        pass
-    if auswahl == 2:
-        pass
-
-    manager = Manager()
+        manager = Manager()
+        save_manager_to_file(manager, filename, key=key)
+    elif auswahl == 2:
+        manager = open_manager_from_file(filename, key=key)
     menu(manager)
+    save_manager_to_file(manager, filename, key=key)
