@@ -6,6 +6,8 @@ from .files import read_file, write_file
 def entries_from_string(from_string: str):
     lines = from_string.splitlines()
     entries = []
+    if len(lines) <= 2:
+        return entries
     line_nums = lines[0].split(",")
     line = 1
     for n in line_nums:
