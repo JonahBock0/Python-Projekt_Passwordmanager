@@ -7,6 +7,8 @@ from .manager import Manager, save_manager_to_file, open_manager_from_file
 
 
 def entry_menu(manager, entry):
+    if not entry:
+        return
     while True:
         auswahl = input_int(f'''Ausgewählt: {entry.name}
 Wählen Sie eine der folgenden Funktionen:
@@ -105,9 +107,26 @@ def delete_entry(manager, entry):
 
 def add_entry(manager):
     print('Eintrag hinzufügen:\n')
-    # Neuen Entry erstellen (Werte eingeben)
-    entry = Entry()
-    entry_menu(manager, entry)
+    name = ""
+    while not name:
+        name = input("Name: ")
+    user = input("Benutzername: ")
+    password = input_or_generate_password()
+    entry = Entry(name=name, user=user, password=password)
+    manager.add_entry(entry)
+    return entry
+
+
+def select_entry_from_list(entries):
+    if not entries:
+        print("Keine Einträge zur Auswahl vorhanden")
+        return None
+    for i, entry in enumerate(entries):
+        print(f"{i + 1}: {entry.name}")
+    selection = -1
+    while selection not in range(len(entries) + 1):
+        selection = input_int("Auswahl (0 zum Abbrechen): ", -1)
+    return entries[selection - 1] if selection > 0 else None
 
 
 def print_entry(entry):
@@ -126,14 +145,17 @@ def menu(manager):
 Hauptmenü:
 Wählen Sie eine der folgenden Funktionen:
     1. Eintrag hinzufügen
-    2. Eintrag anzeigen
-    3. Programm verlassen
+    2. Alle Einträge auflisten
+    3. Eintrag suchen
+    4. Programm verlassen
 Ihre Eingabe: ''')
-        if auswahl == 3:
+        if auswahl == 4:
             break
-        funktionen = {1: add_entry, 2: entry_menu}
+        funktionen = {1: lambda: add_entry(manager),
+                      2: lambda: select_entry_from_list(manager.get_entries()),
+                      3: lambda: select_entry_from_list(manager.find_entries(input("Suche: ")))}
         funktion = funktionen.get(auswahl, wrong_input)
-        funktion(manager)
+        entry_menu(manager, funktion())
 
 
 def cli():
