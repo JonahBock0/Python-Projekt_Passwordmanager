@@ -1,6 +1,6 @@
-from passwordmanager.crypt import generate_key, decrypt, encrypt
-from passwordmanager.entry import Entry
-from passwordmanager.files import read_file, write_file
+from .crypt import generate_key, decrypt, encrypt
+from .entry import Entry
+from .files import read_file, write_file
 
 
 def entries_from_string(from_string: str):

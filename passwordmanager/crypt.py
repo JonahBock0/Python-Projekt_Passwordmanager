@@ -6,7 +6,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-from passwordmanager.files import read_file, write_file
+from .files import read_file, write_file
 
 
 def get_or_create_salt(size: int, filename: str = "passwordmanager.salt") -> bytes:

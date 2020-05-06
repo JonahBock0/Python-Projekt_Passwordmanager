@@ -1,8 +1,8 @@
 from getpass import getpass
 
-from passwordmanager.crypt import generate_key
-from passwordmanager.entry import Entry
-from passwordmanager.manager import Manager, save_manager_to_file, open_manager_from_file
+from .crypt import generate_key
+from .entry import Entry
+from .manager import Manager, save_manager_to_file, open_manager_from_file
 
 
 def entry_menu(manager, entry):
