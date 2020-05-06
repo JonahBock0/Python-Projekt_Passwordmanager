@@ -2,6 +2,7 @@ from getpass import getpass
 
 from .crypt import generate_key
 from .entry import Entry
+from .generator import generate_password
 from .manager import Manager, save_manager_to_file, open_manager_from_file
 
 
@@ -37,7 +38,27 @@ def input_int(text: str, errorval: int = -1):
         return errorval
 
 
-def input_new_value(title: str, old_val: str):
+def input_or_generate_password() -> str:
+    selection = 0
+    password = ""
+    while selection not in [1, 2, 3]:
+        selection = input_int('''Auswählen:
+    1. Passwort eingeben
+    2. Passwort generieren
+    3. Abbrechen
+Auswählen: ''', 0)
+    if selection == 1:
+        while not password:
+            password = input()
+    elif selection == 2:
+        length = 0
+        while length <= 0:
+            length = input_int("Länge: ", 0)
+        password = generate_password(length)
+    return password
+
+
+def input_new_value(title: str, old_val: str) -> str:
     return input(title + ((":   (vorher '" + old_val + "')\n") if old_val else ":\n"))
 
 
@@ -54,7 +75,9 @@ def edit_user(entry):
 
 
 def edit_password(entry):
-    entry.password = input_new_value("Passwort", entry.password)
+    new_password = input_or_generate_password()
+    if new_password:
+        entry.password = new_password
 
 
 def edit_notes(entry: Entry):
