@@ -12,25 +12,27 @@ def entry_menu(manager, entry):
     while True:
         auswahl = input_int(f'''Ausgewählt: {entry.name}
 Wählen Sie eine der folgenden Funktionen:
-    1. Namen bearbeiten
-    2. Benutzernamen bearbeiten
-    3. Passwort bearbeiten
-    4. Notizen bearbeiten
-    5. Attribute bearbeiten
-    6. Eintrag löschen
-    7. zurück ins Hauptmenü
+    1. Eintrag anzeigen
+    2. Namen bearbeiten
+    3. Benutzernamen bearbeiten
+    4. Passwort bearbeiten
+    5. Notizen bearbeiten
+    6. Attribute bearbeiten
+    7. Eintrag löschen
+    8. zurück ins Hauptmenü
 Ihre Eingabe: ''')
 
-        if auswahl == 7:
+        if auswahl == 8:
             break
-        funktionen = {1: lambda: edit_name(entry),
-                      2: lambda: edit_user(entry),
-                      3: lambda: edit_password(entry),
-                      4: lambda: edit_notes(entry),
-                      5: lambda: edit_attributes(entry),
-                      6: lambda: delete_entry(manager, entry)}
-        funktion = funktionen.get(auswahl, wrong_input)
-        funktion()
+        functions = {1: lambda: print_entry(entry),
+                     2: lambda: edit_name(entry),
+                     3: lambda: edit_user(entry),
+                     4: lambda: edit_password(entry),
+                     5: lambda: edit_notes(entry),
+                     6: lambda: edit_attributes(entry),
+                     7: lambda: delete_entry(manager, entry)}
+        function = functions.get(auswahl, wrong_input)
+        function()
 
 
 def input_int(text: str, errorval: int = -1):
@@ -151,11 +153,11 @@ Wählen Sie eine der folgenden Funktionen:
 Ihre Eingabe: ''')
         if auswahl == 4:
             break
-        funktionen = {1: lambda: add_entry(manager),
-                      2: lambda: select_entry_from_list(manager.get_entries()),
-                      3: lambda: select_entry_from_list(manager.find_entries(input("Suche: ")))}
-        funktion = funktionen.get(auswahl, wrong_input)
-        entry_menu(manager, funktion())
+        functions = {1: lambda: add_entry(manager),
+                     2: lambda: select_entry_from_list(manager.get_entries()),
+                     3: lambda: select_entry_from_list(manager.find_entries(input("Suche: ")))}
+        function = functions.get(auswahl, wrong_input)
+        entry_menu(manager, function())
 
 
 def cli():
