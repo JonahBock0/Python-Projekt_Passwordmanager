@@ -10,7 +10,7 @@ from .generator import generate_password
 from .manager import Manager, save_manager_to_file, open_manager_from_file
 
 
-def entry_menu(manager, entry):
+def entry_menu(manager: Manager, entry: Entry):
     if not entry:
         return
     while True:
@@ -70,8 +70,34 @@ def input_new_value(title: str, old_val: str) -> str:
     return input(title + ((":   (vorher '" + old_val + "')\n") if old_val else ":\n"))
 
 
+def attributes_to_string(entry: Entry) -> str:
+    string = ""
+    if entry.attributes:
+        max_len = len(max(entry.attributes.keys(), key=lambda x: len(x)))
+        for key, val in entry.attributes.items():
+            string += key + ":" + " " * (max_len - len(key) + 1) + val + "\n"
+    return string
+
+
 def edit_attributes(entry):
-    pass
+    while True:
+        print(attributes_to_string(entry))
+        selection = input_int('''
+Auswählen:
+    1. Attribut bearbeiten/hinzufügen
+    2. Attribut entfernen
+    3. Zurück
+: ''', 0)
+        if selection == 3:
+            break
+        elif selection == 1 or selection == 2:
+            name = input("Attributsname: ")
+            if name:
+                if selection == 1:
+                    entry.attributes[name] = input("Wert: ")
+                elif selection == 2 and name in entry.attributes.keys():
+                    del entry.attributes[name]
+                print()
 
 
 def edit_name(entry):
@@ -94,7 +120,8 @@ def edit_notes(entry: Entry):
     auswahl = input_int('''Wählen Sie eine der folgenden Funktionen:
     1. Notiz ergänzen (anhängen)
     2. Notiz ersetzen
-    3. Abbrechen''') if entry.notes else 2
+    3. Abbrechen
+: ''') if entry.notes else 2
     if auswahl == 3:
         return
     if auswahl == 1 or auswahl == 2:
@@ -137,7 +164,7 @@ def select_entry_from_list(entries):
 
 def print_entry(entry):
     print("Name: " + entry.name, "Username: " + entry.user, "Passwort: " + entry.password, "Notiz:", entry.notes, "",
-          entry.attributes, sep="\n")
+          attributes_to_string(entry), sep="\n")
     input()
 
 
@@ -157,6 +184,7 @@ Wählen Sie eine der folgenden Funktionen:
     3. Eintrag suchen
     4. Programm verlassen
 Ihre Eingabe: ''')
+        print()
         if auswahl == 4:
             break
         functions = {1: lambda: add_entry(manager),
@@ -175,6 +203,7 @@ Wählen Sie aus Folgendem:
     2. Datenbank öffnen
     3. Beenden
 Ihre Eingabe: ''')
+        print()
     if auswahl == 3:
         return
     manager = None
