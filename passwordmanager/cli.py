@@ -182,11 +182,14 @@ Wählen Sie eine der folgenden Funktionen:
     1. Eintrag hinzufügen
     2. Alle Einträge auflisten
     3. Eintrag suchen
-    4. Programm verlassen
+    4. Speichern
+    5. Programm verlassen (speichern)
 Ihre Eingabe: ''')
         print()
-        if auswahl == 4:
+        if auswahl == 5:
             break
+        elif auswahl == 4:
+            return "save"
         functions = {1: lambda: add_entry(manager),
                      2: lambda: select_entry_from_list(manager.get_entries()),
                      3: lambda: select_entry_from_list(manager.find_entries(input("Suche: ")))}
@@ -237,7 +240,8 @@ Ihre Eingabe: ''')
     except (InvalidSignature, InvalidToken):
         print("Fehler beim Entschlüsseln! Falsches Passwort (oder falsche Salt-Datei)")
     if manager:
-        menu(manager)
+        while menu(manager) == "save":
+            save_manager_to_file(manager, filename, key=key)
         save_manager_to_file(manager, filename, key=key)
     elif auswahl != 3:
         cli()
