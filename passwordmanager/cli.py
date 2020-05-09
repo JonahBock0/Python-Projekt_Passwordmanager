@@ -1,7 +1,11 @@
 from getpass import getpass
 
+from cryptography.exceptions import InvalidSignature
+from cryptography.fernet import InvalidToken
+
 from .crypt import generate_key
 from .entry import Entry
+from .files import check_file
 from .generator import generate_password
 from .manager import Manager, save_manager_to_file, open_manager_from_file
 
@@ -103,7 +107,7 @@ def edit_notes(entry: Entry):
 
 
 def delete_entry(manager, entry):
-    if input(f"Eintrag '{entry.name}' löschen? ('ja' eingeben)").lower() == "ja":
+    if input(f"Eintrag '{entry.name}' löschen? ('ja' eingeben): ").lower() == "ja":
         manager.remove_entry(entry)
 
 
@@ -142,8 +146,10 @@ def wrong_input():
 
 
 def menu(manager):
+    if not manager:
+        return
     while True:
-        auswahl = input_int('''Willkommen im Passwordmanager
+        auswahl = input_int('''
 Hauptmenü:
 Wählen Sie eine der folgenden Funktionen:
     1. Eintrag hinzufügen
@@ -163,20 +169,46 @@ Ihre Eingabe: ''')
 def cli():
     auswahl = 0
     while auswahl not in [1, 2, 3]:
-        auswahl = input_int('''Wählen Sie aus Folgendem:
+        auswahl = input_int('''
+Wählen Sie aus Folgendem:
     1. Neue Datenbank erstellen
     2. Datenbank öffnen
     3. Beenden
 Ihre Eingabe: ''')
     if auswahl == 3:
         return
-    filename = input("Dateiname/Pfad: ")
-    key = generate_key(getpass("Passwort: "))
     manager = None
-    if auswahl == 1:
-        manager = Manager()
+    key = None
+    filename = input("Dateiname/Pfad: ")
+    file_exists = None
+    if filename:
+        file_exists = check_file(filename)
+    else:
+        auswahl = 0
+    try:
+        if auswahl == 1:
+            if not file_exists or (file_exists and input(
+                    f"Datei existiert bereits, überschreiben? ('ja' eingeben): ").lower() == "ja"):
+                password = getpass("Passwort eingeben: ")
+                if password:
+                    if getpass("Passwort wiederholen: ") == password:
+                        key = generate_key(password)
+                        manager = Manager()
+                        save_manager_to_file(manager, filename, key=key)
+                    else:
+                        print("Passwörter stimmen nicht überein!")
+        elif auswahl == 2:
+            if file_exists:
+                key = generate_key(getpass("Passwort: "))
+                manager = open_manager_from_file(filename, key=key)
+            else:
+                raise FileNotFoundError
+    except FileNotFoundError:
+        print("Datei nicht gefunden!")
+    except (InvalidSignature, InvalidToken):
+        print("Fehler beim Entschlüsseln! Falsches Passwort (oder falsche Salt-Datei)")
+    if manager:
+        menu(manager)
         save_manager_to_file(manager, filename, key=key)
-    elif auswahl == 2:
-        manager = open_manager_from_file(filename, key=key)
-    menu(manager)
-    save_manager_to_file(manager, filename, key=key)
+    elif auswahl != 3:
+        cli()
