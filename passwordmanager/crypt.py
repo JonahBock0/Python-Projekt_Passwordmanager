@@ -15,6 +15,7 @@ def get_or_create_salt(size: int, filename: str = "passwordmanager.salt") -> byt
     except FileNotFoundError:
         salt = urandom(size)
         write_file(filename, salt, "wb")
+        print(f"Salt-Datei '{filename}' wurde erstellt. Diese wird zum Entschlüsseln benötigt")
         return salt
 
 
