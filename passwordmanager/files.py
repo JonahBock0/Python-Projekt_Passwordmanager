@@ -1,3 +1,12 @@
+def check_file(filename: str):
+    try:
+        file = open(filename, "r")
+        file.close()
+    except FileNotFoundError:
+        return False
+    return True
+
+
 def read_file(filename: str, mode: str = "rb"):
     file = open(filename, mode)
     content = file.read()
