@@ -1,3 +1,4 @@
-from passwordmanager import gui
+from passwordmanager.gui import Gui
 
-gui.gui()
+gui = Gui()
+gui.mainloop()
