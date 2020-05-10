@@ -1,12 +1,24 @@
 from tkinter import *
+from tkinter import messagebox
 
 passwordsymbol = "•"
 
 
-def gui(manager):
+def gui():
+    manager = None
     root = Tk()
     root.title("Passwortmanager")
     root.minsize(400, 100)
+    root.protocol("WM_DELETE_WINDOW", lambda: close(root))
+    menu = Menu(root)
+    root.config(menu=menu)
+    menu_db = Menu(menu)
+    menu.add_cascade(label="Datenbank", menu=menu_db)
+    menu_db.add_command(label="Neu", command=new)
+    menu_db.add_command(label="Speichern", command=save)
+    menu_db.add_command(label="Laden", command=load)
+    menu_db.add_separator()
+    menu_db.add_command(label="Speichern und Beenden", command=lambda: close(root))
 
     entry_list = Listbox(selectmode=BROWSE)
     entry_list.grid(row=0, rowspan=5, sticky=N + S + W + E)
@@ -75,7 +87,30 @@ def gui(manager):
     root.mainloop()
 
 
-def update_list(manager, entry_list):
+def update_list(manager, entry_list: Listbox):
+    if not manager:
+        return
     entry_list.delete(0, END)
     for entry in manager.get_entries():
         entry_list.insert(END, entry.name)
+
+
+def close(root: Tk):
+    answer = messagebox.askyesnocancel("Beenden", "Datenbank speichern?")
+    if answer is None:
+        return
+    elif answer:
+        save()
+    root.destroy()
+
+
+def save():
+    pass
+
+
+def load():
+    pass
+
+
+def new():
+    pass
