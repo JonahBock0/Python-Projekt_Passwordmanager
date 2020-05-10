@@ -1,5 +1,7 @@
 from tkinter import *
 
+passwordsymbol = "•"
+
 
 def gui(manager):
     root = Tk()
@@ -18,28 +20,40 @@ def gui(manager):
     label_name.grid(row=0, column=2, sticky=W)
     text_name = Entry()
     text_name.grid(row=0, column=3, sticky=W + E)
+    Grid.rowconfigure(root, 0, pad=3)
 
     label_user = Label(text="Benutzername:")
     label_user.grid(row=1, column=2, sticky=W)
     text_user = Entry()
     text_user.grid(row=1, column=3, sticky=W + E)
+    Grid.rowconfigure(root, 1, pad=3)
 
     label_password = Label(text="Passwort:")
     label_password.grid(row=2, column=2, sticky=W)
-    text_password = Entry(show="•")
+    text_password = Entry(show=passwordsymbol)
     text_password.grid(row=2, column=3, sticky=W + E)
+    Grid.rowconfigure(root, 2, pad=3)
+
+    show_password = BooleanVar()
+    checkbox_showpassword = Checkbutton(text="Passwort zeigen", variable=show_password,
+                                        command=lambda: text_password.config(
+                                            show='' if show_password.get() else passwordsymbol))
+    checkbox_showpassword.grid(row=3, column=3, sticky=W)
+    Grid.rowconfigure(root, 3, pad=3)
 
     label_notes = Label(text="Notizen:")
-    label_notes.grid(row=3, column=2, sticky=N + W)
+    label_notes.grid(row=4, column=2, sticky=N + W)
     text_notes = Text(cnf={"height": 3})
-    text_notes.grid(row=3, column=3, sticky=N + S + W + E)
+    text_notes.grid(row=4, column=3, sticky=N + S + W + E, pady=3)
+    Grid.rowconfigure(root, 4, pad=3)
 
     label_attributes = Label(text="Attribute:")
-    label_attributes.grid(row=4, column=2, sticky=N + W)
+    label_attributes.grid(row=5, column=2, sticky=N + W)
     text_attributes = Text(cnf={"height": 3})
-    text_attributes.grid(row=4, column=3, sticky=N + S + W + E)
+    text_attributes.grid(row=5, column=3, sticky=N + S + W + E, pady=3)
+    Grid.rowconfigure(root, 5, pad=3)
 
-    row_weights = [0, 0, 0, 1, 1]
+    row_weights = [0, 0, 0, 0, 1, 1]
     for row, weight in enumerate(row_weights):
         Grid.rowconfigure(root, row, weight=weight)
     col_weights = [1, 0, 0, 2]
@@ -54,10 +68,14 @@ def gui(manager):
         if evt.widget.curselection()
         else "Keine Auswahl"))
 
-    # entry_list.delete(0,END)
-    for entry in manager.get_entries():
-        entry_list.insert(END, entry.name)
+    update_list(manager, entry_list)
     # for i in range(100):
     #     entry_list.insert(END, "Eintrag " + str(i))
 
     root.mainloop()
+
+
+def update_list(manager, entry_list):
+    entry_list.delete(0, END)
+    for entry in manager.get_entries():
+        entry_list.insert(END, entry.name)
