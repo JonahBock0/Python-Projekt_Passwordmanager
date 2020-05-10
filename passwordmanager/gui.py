@@ -20,6 +20,14 @@ class Gui:
         self.add_menu()
         self.show_password = BooleanVar()
         self.entry_list = None
+        self.var_name = StringVar()
+        self.var_user = StringVar()
+        self.var_password = StringVar()
+        self.text_notes = None
+        self.var_attributes = dict()
+        self.list_attributes = None
+        self.var_attr_key = StringVar()
+        self.var_attr_val = StringVar()
         self.add_elements()
 
     def setup_root(self):
@@ -42,29 +50,29 @@ class Gui:
     def add_elements(self):
         self.entry_list = Listbox(selectmode=BROWSE)
         entry_list = self.entry_list
-        entry_list.grid(row=0, rowspan=5, sticky=N + S + W + E)
+        entry_list.grid(row=0, rowspan=6, sticky=N + S + W + E)
         entry_list.bind("<<ListboxSelect>>", self.selection_changed)
 
         entry_scrollbar = Scrollbar(orient=VERTICAL)
         entry_list.config(yscrollcommand=entry_scrollbar.set)
         entry_scrollbar.config(command=entry_list.yview)
-        entry_scrollbar.grid(row=0, column=1, rowspan=5, sticky=N + S + W)
+        entry_scrollbar.grid(row=0, column=1, rowspan=6, sticky=N + S + W)
 
         label_name = Label(text="Name:")
         label_name.grid(row=0, column=2, sticky=W)
-        text_name = Entry()
+        text_name = Entry(textvariable=self.var_name)
         text_name.grid(row=0, column=3, sticky=W + E)
         Grid.rowconfigure(self.root, 0, pad=3)
 
         label_user = Label(text="Benutzername:")
         label_user.grid(row=1, column=2, sticky=W)
-        text_user = Entry()
+        text_user = Entry(textvariable=self.var_user)
         text_user.grid(row=1, column=3, sticky=W + E)
         Grid.rowconfigure(self.root, 1, pad=3)
 
         label_password = Label(text="Passwort:")
         label_password.grid(row=2, column=2, sticky=W)
-        text_password = Entry(show=Gui.passwordsymbol)
+        text_password = Entry(show=Gui.passwordsymbol, textvariable=self.var_password)
         text_password.grid(row=2, column=3, sticky=W + E)
         Grid.rowconfigure(self.root, 2, pad=3)
 
@@ -76,14 +84,26 @@ class Gui:
 
         label_notes = Label(text="Notizen:")
         label_notes.grid(row=4, column=2, sticky=N + W)
-        text_notes = Text(cnf={"height": 3})
-        text_notes.grid(row=4, column=3, sticky=N + S + W + E, pady=3)
-        Grid.rowconfigure(self.root, 4, pad=3)
+        self.text_notes = Text(cnf={"height": 3})
+        self.text_notes.grid(row=4, column=3, sticky=N + S + W + E, pady=3)
+        Grid.rowconfigure(self.root, 4, pad=3, minsize=30)
 
         label_attributes = Label(text="Attribute:")
         label_attributes.grid(row=5, column=2, sticky=N + W)
-        text_attributes = Text(cnf={"height": 3})
-        text_attributes.grid(row=5, column=3, sticky=N + S + W + E, pady=3)
+        frame_attributes = Frame(self.root)
+        self.list_attributes = Listbox(frame_attributes, selectmode=BROWSE)
+        self.list_attributes.bind("<<ListboxSelect>>", self.attributes_selection_changed)
+        self.list_attributes.grid(row=0, column=0, columnspan=2, sticky=N + S + W + E)
+        text_attr_key = Entry(frame_attributes, textvariable=self.var_attr_key)
+        text_attr_key.grid(row=1, column=0, sticky=W + E)
+        text_attr_val = Entry(frame_attributes, textvariable=self.var_attr_val)
+        text_attr_val.grid(row=1, column=1, sticky=W + E)
+        button_attr_add = Button(frame_attributes, text="Hinzufügen/Aktualisieren")
+        button_attr_add.grid(row=2, column=0, columnspan=2)
+        frame_attributes.grid_columnconfigure(0, weight=1)
+        frame_attributes.grid_rowconfigure(0, weight=1)
+        frame_attributes.grid_columnconfigure(1, weight=1)
+        frame_attributes.grid(row=5, column=3, sticky=N + S + W + E, pady=3)
         Grid.rowconfigure(self.root, 5, pad=3)
 
         row_weights = [0, 0, 0, 0, 1, 1]
@@ -116,6 +136,33 @@ class Gui:
         index = evt.widget.curselection()[0] if evt.widget.curselection() else -1
         if index >= 0:
             self.entry_selected = self._manager.get_entries()[index]
+            self.update_elements()
+
+    def update_elements(self):
+        if not self.entry_selected:
+            return
+        e = self.entry_selected
+        self.var_name.set(e.name)
+        self.var_user.set(e.user)
+        self.var_password.set(e.password)
+        self.var_attributes = e.attributes
+        self.update_attribute_list()
+        self.text_notes.delete(1.0, END)
+        self.text_notes.insert(END, e.notes)
+
+    def update_attribute_list(self):
+        self.list_attributes.delete(0, END)
+        for key, val in self.var_attributes.items():
+            self.list_attributes.insert(END, f"{key}: {val}")
+
+    def attributes_selection_changed(self, evt):
+        if not self._manager or not self.entry_selected:
+            return
+        index = evt.widget.curselection()[0] if evt.widget.curselection() else -1
+        if index >= 0:
+            selected_attribute = list(self.entry_selected.attributes.items())[index]
+            self.var_attr_key.set(selected_attribute[0])
+            self.var_attr_val.set(selected_attribute[1])
 
     def close(self):
         if self._manager:
