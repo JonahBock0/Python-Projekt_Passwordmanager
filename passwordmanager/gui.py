@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import messagebox, filedialog
+from tkinter import messagebox, filedialog, simpledialog
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import InvalidToken
@@ -134,7 +134,9 @@ class Gui:
                 elif password:
                     save_manager_to_file(self._manager, filename=self._filename, password=password)
                 else:
-                    self.password_input(self.save)
+                    password = self.password_input(create=True)
+                    if password:
+                        self.save(password=password)
             else:
                 self.save_as()
 
@@ -162,24 +164,20 @@ class Gui:
             filename = filedialog.askopenfilename()
             if filename:
                 self._filename = filename
-                self.password_input(self.open)
+                self.open(self.password_input())
 
-    def password_input(self, callback, create=False):
-        dialog = Toplevel(self.root)
-        dialog.minsize(200, 150)
-        title = "Passwort" + (" erstellen:" if create else ":")
-        dialog.title(title)
-        label = Label(dialog, text=title)
-        label.pack()
-        pw_entry = Entry(dialog, show=Gui.passwordsymbol)
-        pw_entry2 = Entry(dialog, show=Gui.passwordsymbol) if create else None
-        pw_entry.pack()
-        if pw_entry2:
-            pw_entry2.pack()
-        button = Button(dialog, text="Ok", command=lambda: [callback(
-            password=pw_entry.get() if not pw_entry2
-            else pw_entry2.get() if pw_entry.get() == pw_entry2.get() else None), dialog.destroy()])
-        button.pack()
+    def password_input(self, create=False):
+        prompt = "Passwort" + (" erstellen:" if create else ":")
+        pw = simpledialog.askstring("Passwort", prompt, show=Gui.passwordsymbol)
+        if pw:
+            if create:
+                pw2 = simpledialog.askstring("Passwort", "Passwort wiederholen:", show=Gui.passwordsymbol)
+                if pw2 and pw == pw2:
+                    return pw
+            else:
+                return pw
+        else:
+            return None
 
     def new(self):
         self._manager = Manager()
