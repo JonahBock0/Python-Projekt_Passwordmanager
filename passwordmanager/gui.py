@@ -243,8 +243,10 @@ class Gui:
             if create:
                 pw2 = simpledialog.askstring("Passwort", "Passwort wiederholen:", show=Gui.passwordsymbol)
                 if pw2 and pw == pw2:
+                    self._password = pw
                     return pw
             else:
+                self._password = pw
                 return pw
         else:
             return None
