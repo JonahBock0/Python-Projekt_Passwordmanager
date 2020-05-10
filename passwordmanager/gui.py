@@ -98,7 +98,7 @@ class Gui:
         text_attr_key.grid(row=1, column=0, sticky=W + E)
         text_attr_val = Entry(frame_attributes, textvariable=self.var_attr_val)
         text_attr_val.grid(row=1, column=1, sticky=W + E)
-        button_attr_add = Button(frame_attributes, text="Hinzufügen/Aktualisieren")
+        button_attr_add = Button(frame_attributes, text="Hinzufügen/Aktualisieren", command=self.attribute_apply)
         button_attr_add.grid(row=2, column=0, columnspan=2)
         frame_attributes.grid_columnconfigure(0, weight=1)
         frame_attributes.grid_rowconfigure(0, weight=1)
@@ -117,8 +117,6 @@ class Gui:
             Grid.columnconfigure(self.root, col, minsize=minsize)
 
         self.update_list()
-        # for i in range(100):
-        #     self.entry_list.insert(END, "Eintrag " + str(i))
 
     def mainloop(self):
         self.root.mainloop()
@@ -133,6 +131,8 @@ class Gui:
     def selection_changed(self, evt):
         if not self._manager:
             return
+        if self.entry_selected:
+            self.update_entry()
         index = evt.widget.curselection()[0] if evt.widget.curselection() else -1
         if index >= 0:
             self.entry_selected = self._manager.get_entries()[index]
@@ -147,13 +147,33 @@ class Gui:
         self.var_password.set(e.password)
         self.var_attributes = e.attributes
         self.update_attribute_list()
-        self.text_notes.delete(1.0, END)
+        self.text_notes.delete("1.0", END)
         self.text_notes.insert(END, e.notes)
+
+    def update_entry(self):
+        if not self.entry_selected:
+            return
+        e = self.entry_selected
+        e.name = self.var_name.get()
+        e.user = self.var_user.get()
+        e.password = self.var_password.get()
+        e.attributes = self.var_attributes
+        e.notes = self.text_notes.get("1.0", "end-1c")
 
     def update_attribute_list(self):
         self.list_attributes.delete(0, END)
         for key, val in self.var_attributes.items():
-            self.list_attributes.insert(END, f"{key}: {val}")
+            self.list_attributes.insert(END, f"{key}: \t{val}")
+
+    def attribute_apply(self):
+        if self.var_attr_val.get():
+            self.var_attributes[self.var_attr_key.get()] = self.var_attr_val.get()
+            self.update_attribute_list()
+
+    def attribute_remove(self):
+        if self.var_attr_val.get():
+            del self.var_attributes[self.var_attr_key.get()]
+            self.update_attribute_list()
 
     def attributes_selection_changed(self, evt):
         if not self._manager or not self.entry_selected:
@@ -176,6 +196,8 @@ class Gui:
     def save(self, password=None):
         if self._manager:
             if self._filename:
+                if self.entry_selected:
+                    self.update_entry()
                 if self._password:
                     save_manager_to_file(self._manager, filename=self._filename, password=self._password)
                 elif password:
@@ -199,6 +221,7 @@ class Gui:
         if password and self._filename:
             try:
                 self._manager = open_manager_from_file(self._filename, password=password)
+                self._password = password
                 self.update_list()
             except FileNotFoundError:
                 messagebox.showerror("Fehler!", "Datei nicht gefunden!")
