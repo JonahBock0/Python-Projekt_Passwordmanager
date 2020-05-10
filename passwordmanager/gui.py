@@ -26,26 +26,26 @@ def gui(manager):
 
     label_password = Label(text="Passwort:")
     label_password.grid(row=2, column=2, sticky=W)
-    text_password = Entry()
+    text_password = Entry(show="•")
     text_password.grid(row=2, column=3, sticky=W + E)
 
     label_notes = Label(text="Notizen:")
-    label_notes.grid(row=3, column=2, sticky=W)
+    label_notes.grid(row=3, column=2, sticky=N + W)
     text_notes = Text(cnf={"height": 3})
     text_notes.grid(row=3, column=3, sticky=N + S + W + E)
 
     label_attributes = Label(text="Attribute:")
-    label_attributes.grid(row=4, column=2, sticky=W)
+    label_attributes.grid(row=4, column=2, sticky=N + W)
     text_attributes = Text(cnf={"height": 3})
     text_attributes.grid(row=4, column=3, sticky=N + S + W + E)
 
-    for row in range(5):
-        if row not in [0, 1, 2]:
-            Grid.rowconfigure(root, row, weight=1)
-    for col in range(4):
-        if col not in [1, 2]:
-            Grid.columnconfigure(root, col, weight=1)
-    mincolsizes = {0: 100, 1: 20, 2: 100}
+    row_weights = [0, 0, 0, 1, 1]
+    for row, weight in enumerate(row_weights):
+        Grid.rowconfigure(root, row, weight=weight)
+    col_weights = [1, 0, 0, 2]
+    for col, weight in enumerate(col_weights):
+        Grid.columnconfigure(root, col, weight=weight)
+    mincolsizes = {0: 100, 2: 100}
     for col, minsize in mincolsizes.items():
         Grid.columnconfigure(root, col, minsize=minsize)
 
