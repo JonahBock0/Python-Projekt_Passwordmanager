@@ -1,5 +1,10 @@
 from tkinter import *
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
+
+from cryptography.exceptions import InvalidSignature
+from cryptography.fernet import InvalidToken
+
+from .manager import open_manager_from_file, save_manager_to_file, Manager
 
 
 class Gui:
@@ -30,7 +35,7 @@ class Gui:
         menu_db.add_command(label="Neu", command=self.new)
         menu_db.add_command(label="Speichern", command=self.save)
         menu_db.add_command(label="Speichern unter...", command=self.save_as)
-        menu_db.add_command(label="Laden", command=self.load)
+        menu_db.add_command(label="Öffnen", command=self.open)
         menu_db.add_separator()
         menu_db.add_command(label="Speichern und Beenden", command=self.close)
 
@@ -108,7 +113,7 @@ class Gui:
     def selection_changed(self, evt):
         if not self._manager:
             return
-        index = evt.widget.get(evt.widget.curselection()[0]) if evt.widget.curselection() else -1
+        index = evt.widget.curselection()[0] if evt.widget.curselection() else -1
         if index >= 0:
             self.entry_selected = self._manager.get_entries()[index]
 
@@ -121,14 +126,61 @@ class Gui:
                 self.save()
         self.root.destroy()
 
-    def save(self):
-        pass
+    def save(self, password=None):
+        if self._manager:
+            if self._filename:
+                if self._password:
+                    save_manager_to_file(self._manager, filename=self._filename, password=self._password)
+                elif password:
+                    save_manager_to_file(self._manager, filename=self._filename, password=password)
+                else:
+                    self.password_input(self.save)
+            else:
+                self.save_as()
 
     def save_as(self):
-        pass
+        filename = filedialog.asksaveasfilename()
+        if filename:
+            self._filename = filename
+            if self._password and messagebox.askyesno("Neues Passwort?", "Neues Passwort festlegen?"):
+                self._password = None
+            self.save()
 
-    def load(self):
-        pass
+    def open(self, password=None):
+        if password and self._filename:
+            try:
+                self._manager = open_manager_from_file(self._filename, password=password)
+                self.update_list()
+            except FileNotFoundError:
+                messagebox.showerror("Fehler!", "Datei nicht gefunden!")
+            except (InvalidSignature, InvalidToken):
+                messagebox.showerror("Fehler!",
+                                     "Fehler beim Entschlüsseln! Falsches Passwort (oder falsche Salt-Datei)")
+            except Exception as e:
+                messagebox.showerror("Fehler!", str(e))
+        else:
+            filename = filedialog.askopenfilename()
+            if filename:
+                self._filename = filename
+                self.password_input(self.open)
+
+    def password_input(self, callback, create=False):
+        dialog = Toplevel(self.root)
+        dialog.minsize(200, 150)
+        title = "Passwort" + (" erstellen:" if create else ":")
+        dialog.title(title)
+        label = Label(dialog, text=title)
+        label.pack()
+        pw_entry = Entry(dialog, show=Gui.passwordsymbol)
+        pw_entry2 = Entry(dialog, show=Gui.passwordsymbol) if create else None
+        pw_entry.pack()
+        if pw_entry2:
+            pw_entry2.pack()
+        button = Button(dialog, text="Ok", command=lambda: [callback(
+            password=pw_entry.get() if not pw_entry2
+            else pw_entry2.get() if pw_entry.get() == pw_entry2.get() else None), dialog.destroy()])
+        button.pack()
 
     def new(self):
-        pass
+        self._manager = Manager()
+        self.update_list()
