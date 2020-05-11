@@ -13,6 +13,9 @@ class Gui:
     passwordsymbol = "•"
 
     def __init__(self):
+        self.list_menu = [("[Neue Datenbank]", self.new),
+                          ("[Datenbank öffnen]", self.open),
+                          ("[Beenden]", self.close)]
         self._manager = None
         self._password = None
         self._filename = None
@@ -135,24 +138,28 @@ class Gui:
         self.root.mainloop()
 
     def update_list(self):
+        self.entry_list.delete(0, END)
         if self._manager:
             if self.entry_selected:
                 self.update_entry()
-            self.entry_list.delete(0, END)
             for entry in self._manager.get_entries():
                 self.entry_list.insert(END, entry.name)
         else:
-            self.entry_list.delete(0, END)
+            for text, func in self.list_menu:
+                self.entry_list.insert(END, text)
 
     def selection_changed(self, evt):
-        if not self._manager:
-            return
-        if self.entry_selected:
-            self.update_entry()
         index = evt.widget.curselection()[0] if evt.widget.curselection() else -1
-        if index >= 0:
-            self.entry_selected = self._manager.get_entries()[index]
-            self.update_elements()
+        if self._manager:
+            if self.entry_selected:
+                self.update_entry()
+            if index >= 0:
+                self.entry_selected = self._manager.get_entries()[index]
+                self.update_elements()
+        else:
+            func = self.list_menu[index][1] if index >= 0 else None
+            if func:
+                func()
 
     def update_elements(self):
         if not self.entry_selected:
@@ -199,7 +206,7 @@ class Gui:
     def update_attribute_list(self):
         self.list_attributes.delete(0, END)
         for key, val in self.var_attributes.items():
-            self.list_attributes.insert(END, f"{key}: \t{val}")
+            self.list_attributes.insert(END, f"{key}:  {val}")
 
     def attribute_apply(self):
         if self.var_attr_val.get():
