@@ -33,7 +33,8 @@ class Gui:
 
     def setup_root(self):
         self.root.title("Passwortmanager")
-        self.root.minsize(400, 100)
+        self.root.minsize(500, 300)
+        self.root.geometry("800x500")
         self.root.protocol("WM_DELETE_WINDOW", self.close)
 
     def add_menu(self):
@@ -42,9 +43,9 @@ class Gui:
         menu_db = Menu(menu)
         menu.add_cascade(label="Datenbank", menu=menu_db)
         menu_db.add_command(label="Neu", command=self.new)
+        menu_db.add_command(label="Öffnen", command=self.open)
         menu_db.add_command(label="Speichern", command=self.save)
         menu_db.add_command(label="Speichern unter...", command=self.save_as)
-        menu_db.add_command(label="Öffnen", command=self.open)
         menu_db.add_separator()
         menu_db.add_command(label="Speichern und Beenden", command=lambda: self.close(save=True))
 
@@ -92,7 +93,7 @@ class Gui:
         label_attributes = Label(text="Attribute:")
         label_attributes.grid(row=5, column=2, sticky=N + W)
         frame_attributes = Frame(self.root)
-        self.list_attributes = Listbox(frame_attributes, selectmode=BROWSE)
+        self.list_attributes = Listbox(frame_attributes, height=3, selectmode=BROWSE)
         self.list_attributes.bind("<<ListboxSelect>>", self.attributes_selection_changed)
         self.list_attributes.grid(row=0, column=0, columnspan=2, sticky=N + S + W + E)
         text_attr_key = Entry(frame_attributes, textvariable=self.var_attr_key)
@@ -105,7 +106,9 @@ class Gui:
         button_attr_add.grid(row=2, column=1, sticky=W)
         frame_attributes.grid_columnconfigure(0, weight=2)
         frame_attributes.grid_columnconfigure(1, weight=3)
-        frame_attributes.grid_rowconfigure(0, weight=1)
+        frame_attributes.grid_rowconfigure(0, weight=1, minsize=30)
+        frame_attributes.grid_rowconfigure(1, minsize=30)
+        frame_attributes.grid_rowconfigure(2, minsize=30)
         frame_attributes.grid(row=5, column=3, sticky=N + S + W + E, pady=3)
         Grid.rowconfigure(self.root, 5, pad=3, weight=1)
 
@@ -118,9 +121,7 @@ class Gui:
         col_weights = [1, 0, 0, 2]
         for col, weight in enumerate(col_weights):
             Grid.columnconfigure(self.root, col, weight=weight)
-        mincolsizes = {0: 100, 2: 100}
-        for col, minsize in mincolsizes.items():
-            Grid.columnconfigure(self.root, col, minsize=minsize)
+        Grid.columnconfigure(self.root, 0, minsize=130)
 
         self.update_list()
 
