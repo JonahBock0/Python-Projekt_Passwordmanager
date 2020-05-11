@@ -77,11 +77,14 @@ class Gui:
         text_password = Entry(show=Gui.passwordsymbol, textvariable=self.var_password)
         text_password.grid(row=2, column=3, sticky=W + E)
         Grid.rowconfigure(self.root, 2, pad=3)
-
-        checkbox_showpassword = Checkbutton(text="Passwort zeigen", variable=self.show_password,
+        frame_password = Frame(self.root)
+        checkbox_showpassword = Checkbutton(frame_password, text="Passwort zeigen", variable=self.show_password,
                                             command=lambda: text_password.config(
                                                 show='' if self.show_password.get() else Gui.passwordsymbol))
-        checkbox_showpassword.grid(row=3, column=3, sticky=W)
+        checkbox_showpassword.grid(row=0, column=0)
+        button_copy_password = Button(frame_password, text="Passwort kopieren", command=self.copy_password)
+        button_copy_password.grid(row=0, column=1)
+        frame_password.grid(row=3, column=3, sticky=W)
         Grid.rowconfigure(self.root, 3, pad=3)
 
         label_notes = Label(text="Notizen:")
@@ -283,3 +286,8 @@ class Gui:
     def new(self):
         self._manager = Manager()
         self.update_list()
+
+    def copy_password(self):
+        if self._manager and self.entry_selected:
+            self.root.clipboard_clear()
+            self.root.clipboard_append(self.var_password.get())
