@@ -4,6 +4,7 @@ from tkinter import messagebox, filedialog, simpledialog
 from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import InvalidToken
 
+from .entry import Entry as PEntry
 from .manager import open_manager_from_file, save_manager_to_file, Manager
 
 
@@ -86,7 +87,7 @@ class Gui:
         label_notes.grid(row=4, column=2, sticky=N + W)
         self.text_notes = Text(cnf={"height": 3})
         self.text_notes.grid(row=4, column=3, sticky=N + S + W + E, pady=3)
-        Grid.rowconfigure(self.root, 4, pad=3, minsize=30)
+        Grid.rowconfigure(self.root, 4, pad=3, minsize=30, weight=1)
 
         label_attributes = Label(text="Attribute:")
         label_attributes.grid(row=5, column=2, sticky=N + W)
@@ -99,16 +100,21 @@ class Gui:
         text_attr_val = Entry(frame_attributes, textvariable=self.var_attr_val)
         text_attr_val.grid(row=1, column=1, sticky=W + E)
         button_attr_add = Button(frame_attributes, text="Hinzufügen/Aktualisieren", command=self.attribute_apply)
-        button_attr_add.grid(row=2, column=0, columnspan=2)
-        frame_attributes.grid_columnconfigure(0, weight=1)
+        button_attr_add.grid(row=2, column=0, sticky=E)
+        button_attr_add = Button(frame_attributes, text="Entfernen", command=self.attribute_remove)
+        button_attr_add.grid(row=2, column=1, sticky=W)
+        frame_attributes.grid_columnconfigure(0, weight=2)
+        frame_attributes.grid_columnconfigure(1, weight=3)
         frame_attributes.grid_rowconfigure(0, weight=1)
-        frame_attributes.grid_columnconfigure(1, weight=1)
         frame_attributes.grid(row=5, column=3, sticky=N + S + W + E, pady=3)
-        Grid.rowconfigure(self.root, 5, pad=3)
+        Grid.rowconfigure(self.root, 5, pad=3, weight=1)
 
-        row_weights = [0, 0, 0, 0, 1, 1]
-        for row, weight in enumerate(row_weights):
-            Grid.rowconfigure(self.root, row, weight=weight)
+        button_add_entry = Button(text="Eintrag hinzufügen", command=self.new_entry)
+        button_add_entry.grid(row=6, column=0)
+        button_add_entry = Button(text="Eintrag löschen", command=self.delete_entry)
+        button_add_entry.grid(row=6, column=1, columnspan=2)
+        Grid.rowconfigure(self.root, 6, pad=3)
+
         col_weights = [1, 0, 0, 2]
         for col, weight in enumerate(col_weights):
             Grid.columnconfigure(self.root, col, weight=weight)
@@ -124,6 +130,8 @@ class Gui:
     def update_list(self):
         if not self._manager:
             return
+        if self.entry_selected:
+            self.update_entry()
         self.entry_list.delete(0, END)
         for entry in self._manager.get_entries():
             self.entry_list.insert(END, entry.name)
@@ -154,11 +162,31 @@ class Gui:
         if not self.entry_selected:
             return
         e = self.entry_selected
-        e.name = self.var_name.get()
+        name = self.var_name.get()
+        name_changed = e.name != name
+        e.name = name
         e.user = self.var_user.get()
         e.password = self.var_password.get()
         e.attributes = self.var_attributes
-        e.notes = self.text_notes.get("1.0", "end-1c")
+        e.notes = self.text_notes.get("1.0", "end-1c")  # Text aus Textfeld auslesen, zusätzliche Newline entfernen
+        if name_changed:  # Liste aktualisieren, wenn sich der Name geändert hat
+            self.update_list()
+
+    def new_entry(self):
+        if not self._manager:
+            return
+        entry = PEntry(name="Neuer Eintrag")
+        self._manager.add_entry(entry)
+        self.update_list()
+        self.entry_list.select_set(END, END)
+        self.entry_selected = entry
+        self.update_elements()
+
+    def delete_entry(self):
+        if self._manager and self.entry_selected:
+            if messagebox.askyesno("Löschen?", f"Wirklich '{self.entry_selected.name}' löschen?"):
+                self._manager.remove_entry(self.entry_selected)
+                self.update_list()
 
     def update_attribute_list(self):
         self.list_attributes.delete(0, END)
