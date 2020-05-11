@@ -46,7 +46,7 @@ class Gui:
         menu_db.add_command(label="Speichern unter...", command=self.save_as)
         menu_db.add_command(label="Öffnen", command=self.open)
         menu_db.add_separator()
-        menu_db.add_command(label="Speichern und Beenden", command=self.close)
+        menu_db.add_command(label="Speichern und Beenden", command=lambda: self.close(save=True))
 
     def add_elements(self):
         self.entry_list = Listbox(selectmode=BROWSE)
@@ -212,9 +212,9 @@ class Gui:
             self.var_attr_key.set(selected_attribute[0])
             self.var_attr_val.set(selected_attribute[1])
 
-    def close(self):
+    def close(self, save=None):
         if self._manager:
-            answer = messagebox.askyesnocancel("Beenden", "Datenbank speichern?")
+            answer = messagebox.askyesnocancel("Beenden", "Datenbank speichern?") if save is None else save
             if answer is None:
                 return
             elif answer:

@@ -1,6 +1,7 @@
 # Starten über 'python -m passwordmanager'
 __package__ = "passwordmanager"
 
-from .cli import cli
+from .gui import Gui
 
-cli()
+gui = Gui()
+gui.mainloop()
