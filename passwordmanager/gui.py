@@ -5,6 +5,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import InvalidToken
 
 from .entry import Entry as PEntry
+from .generator import generate_password
 from .manager import open_manager_from_file, save_manager_to_file, Manager
 
 
@@ -84,6 +85,8 @@ class Gui:
         checkbox_showpassword.grid(row=0, column=0)
         button_copy_password = Button(frame_password, text="Passwort kopieren", command=self.copy_password)
         button_copy_password.grid(row=0, column=1)
+        button_generate_password = Button(frame_password, text="Passwortgenerator", command=self.generate_password)
+        button_generate_password.grid(row=0, column=2)
         frame_password.grid(row=3, column=3, sticky=W)
         Grid.rowconfigure(self.root, 3, pad=3)
 
@@ -132,13 +135,14 @@ class Gui:
         self.root.mainloop()
 
     def update_list(self):
-        if not self._manager:
-            return
-        if self.entry_selected:
-            self.update_entry()
-        self.entry_list.delete(0, END)
-        for entry in self._manager.get_entries():
-            self.entry_list.insert(END, entry.name)
+        if self._manager:
+            if self.entry_selected:
+                self.update_entry()
+            self.entry_list.delete(0, END)
+            for entry in self._manager.get_entries():
+                self.entry_list.insert(END, entry.name)
+        else:
+            self.entry_list.delete(0, END)
 
     def selection_changed(self, evt):
         if not self._manager:
@@ -291,3 +295,47 @@ class Gui:
         if self._manager and self.entry_selected:
             self.root.clipboard_clear()
             self.root.clipboard_append(self.var_password.get())
+
+    def generate_password(self):
+        if self._manager and self.entry_selected:
+            generator = Passwordgenerator(self.root)
+            if generator.password:
+                self.var_password.set(generator.password)
+
+
+# noinspection PyAttributeOutsideInit
+class Passwordgenerator(simpledialog.Dialog):
+    def body(self, master):
+        self.title("Passwortmanager")
+        self.length = StringVar(value="12")
+        self.exclude = StringVar(value="")
+        self.punctuation = BooleanVar(value=True)
+        self.digits = BooleanVar(value=True)
+        self.letters = BooleanVar(value=True)
+        self.space = BooleanVar(value=True)
+        self.password = None
+        frame = Frame(self)
+        Label(frame, text="Länge:").grid(row=0, column=0, sticky=W)
+        val = (self.register(lambda newval: newval.isnumeric() or not newval), '%P')
+        Entry(frame, textvariable=self.length, validate="all", validatecommand=val).grid(row=0, column=1, sticky=W + E)
+        checkbutton_conf = dict(column=0, columnspan=2, sticky=W, padx=10)
+        Checkbutton(frame, text="Buchstaben", variable=self.letters).grid(checkbutton_conf, row=1)
+        Checkbutton(frame, text="Zahlen", variable=self.digits).grid(checkbutton_conf, row=2)
+        Checkbutton(frame, text="Sonderzeichen", variable=self.punctuation).grid(checkbutton_conf, row=3)
+        Checkbutton(frame, text="Leerzeichen", variable=self.space).grid(checkbutton_conf, row=4)
+        Label(frame, text="Zeichen ausschließen:").grid(row=5, column=0, sticky=W)
+        Entry(frame, textvariable=self.exclude).grid(row=5, column=1, sticky=W + E)
+        frame.columnconfigure(0, weight=1)
+        frame.columnconfigure(1, weight=2)
+        frame.pack(fill="both", padx=10)
+
+    def validate(self):
+        length = int(self.length.get()) if self.length.get() else 0
+        if length > 0 and (
+                self.letters.get() or self.digits.get() or self.punctuation.get() or self.space.get()):
+            password = generate_password(length, exclude=self.exclude.get(),
+                                         letters=self.letters.get(), digits=self.digits.get(),
+                                         punctuation=self.punctuation.get(), space=self.space.get())
+            self.password = password if password else None
+            return bool(self.password)
+        return False
