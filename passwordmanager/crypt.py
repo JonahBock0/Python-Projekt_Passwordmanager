@@ -8,6 +8,8 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 from .files import read_file, write_file
 
+callback_salt_created = print
+
 
 def get_or_create_salt(size: int, filename: str = "passwordmanager.salt") -> bytes:
     try:
@@ -15,7 +17,7 @@ def get_or_create_salt(size: int, filename: str = "passwordmanager.salt") -> byt
     except FileNotFoundError:
         salt = urandom(size)
         write_file(filename, salt, "wb")
-        print(f"Salt-Datei '{filename}' wurde erstellt. Diese wird zum Entschlüsseln benötigt")
+        callback_salt_created(f"Salt-Datei '{filename}' wurde erstellt. Diese wird zum Entschlüsseln benötigt")
         return salt
 
 

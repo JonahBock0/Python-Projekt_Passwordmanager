@@ -4,6 +4,7 @@ from tkinter import messagebox, filedialog, simpledialog
 from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import InvalidToken
 
+from . import crypt
 from .entry import Entry as PEntry
 from .generator import generate_password
 from .manager import open_manager_from_file, save_manager_to_file, Manager
@@ -34,6 +35,7 @@ class Gui:
         self.var_attr_key = StringVar()
         self.var_attr_val = StringVar()
         self.add_elements()
+        crypt.callback_salt_created = lambda x: messagebox.showinfo("Salt-Datei", x)
 
     def setup_root(self):
         self.root.title("Passwortmanager")
