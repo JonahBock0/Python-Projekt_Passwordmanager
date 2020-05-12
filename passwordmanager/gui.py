@@ -69,19 +69,16 @@ class Gui:
         entry_list.grid(row=0, rowspan=6, sticky=N + S + W + E)
         entry_list.bind("<<ListboxSelect>>", self.selection_changed)
 
-        entry_scrollbar = Scrollbar(orient=VERTICAL)
+        entry_scrollbar = Scrollbar(orient=VERTICAL, command=entry_list.yview)
         entry_list.config(yscrollcommand=entry_scrollbar.set)
-        entry_scrollbar.config(command=entry_list.yview)
         entry_scrollbar.grid(row=0, column=1, rowspan=6, sticky=N + S + W)
 
         Label(text="Name:").grid(row=0, column=2, sticky=W)
-        text_name = Entry(textvariable=self.var_name)
-        text_name.grid(row=0, column=3, sticky=W + E)
+        Entry(textvariable=self.var_name).grid(row=0, column=3, sticky=W + E)
         root.rowconfigure(0, pad=3)
 
         Label(text="Benutzername:").grid(row=1, column=2, sticky=W)
-        text_user = Entry(textvariable=self.var_user)
-        text_user.grid(row=1, column=3, sticky=W + E)
+        Entry(textvariable=self.var_user).grid(row=1, column=3, sticky=W + E)
         root.rowconfigure(1, pad=3)
 
         Label(text="Passwort:").grid(row=2, column=2, sticky=W)
@@ -107,10 +104,8 @@ class Gui:
         self.list_attributes = Listbox(frame_attr, height=3, selectmode=BROWSE, exportselection=0)
         self.list_attributes.bind("<<ListboxSelect>>", self.attributes_selection_changed)
         self.list_attributes.grid(row=0, column=0, columnspan=2, sticky=N + S + W + E)
-        text_attr_key = Entry(frame_attr, textvariable=self.var_attr_key)
-        text_attr_key.grid(row=1, column=0, sticky=W + E)
-        text_attr_val = Entry(frame_attr, textvariable=self.var_attr_val)
-        text_attr_val.grid(row=1, column=1, sticky=W + E)
+        Entry(frame_attr, textvariable=self.var_attr_key).grid(row=1, column=0, sticky=W + E)
+        Entry(frame_attr, textvariable=self.var_attr_val).grid(row=1, column=1, sticky=W + E)
         Button(frame_attr, text="Hinzufügen/Aktualisieren", command=self.attribute_apply
                ).grid(row=2, column=0, sticky=E)
         Button(frame_attr, text="Entfernen", command=self.attribute_remove).grid(row=2, column=1, sticky=W)
@@ -122,10 +117,8 @@ class Gui:
         frame_attr.grid(row=5, column=3, sticky=N + S + W + E, pady=3)
         root.rowconfigure(5, pad=3, weight=1)
 
-        button_add_entry = Button(text="Eintrag hinzufügen", command=self.new_entry)
-        button_add_entry.grid(row=6, column=0)
-        button_add_entry = Button(text="Eintrag löschen", command=self.delete_entry)
-        button_add_entry.grid(row=6, column=1, columnspan=2)
+        Button(text="Eintrag hinzufügen", command=self.new_entry).grid(row=6, column=0)
+        Button(text="Eintrag löschen", command=self.delete_entry).grid(row=6, column=1, columnspan=2)
         root.rowconfigure(6, pad=3)
 
         col_weights = [1, 0, 0, 2]
