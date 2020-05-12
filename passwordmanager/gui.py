@@ -178,9 +178,12 @@ class Gui:
         self.update_attribute_list()
         self.var_attr_val.set("")
         self.var_attr_key.set("")
+        text_notes_state = self.text_notes["state"]  # state speichern
+        self.text_notes["state"] = NORMAL  # ...zum Bearbeiten auf NORMAL setzen
         self.text_notes.delete("1.0", END)
         if e:
             self.text_notes.insert(END, e.notes)
+        self.text_notes["state"] = text_notes_state  # ...und auf den vorherigen Wert setzen
 
     def update_entry(self):
         e = self.entry_selected
