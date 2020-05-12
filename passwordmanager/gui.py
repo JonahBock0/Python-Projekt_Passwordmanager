@@ -34,7 +34,6 @@ class Gui:
         self.list_attributes = None
         self.var_attr_key = StringVar()
         self.var_attr_val = StringVar()
-        self.input_elements = []
         self.setup_root()
         self.setup_menu()
         self.setup_elements()
@@ -133,7 +132,6 @@ class Gui:
         for col, weight in enumerate(col_weights):
             root.columnconfigure(col, weight=weight)
         root.columnconfigure(0, minsize=130)
-        self.input_elements = [text_name, text_user, text_password, self.text_notes, text_attr_key, text_attr_val]
 
     def mainloop(self):
         self.root.mainloop()
@@ -152,8 +150,17 @@ class Gui:
 
     def update_input_state(self):
         state = NORMAL if self._manager and self.entry_selected else DISABLED
-        for input_element in self.input_elements:
-            input_element['state'] = state
+        for element in self.root.children.values():
+            self.set_state(
+                element, state,
+                lambda e: e is not self.entry_list and isinstance(e, (Entry, Button, Text, Checkbutton, Listbox)))
+
+    def set_state(self, element, state, test=lambda e: True):
+        if element.children:
+            for e in element.children.values():
+                self.set_state(e, state, test)
+        elif test(element):
+            element['state'] = state
 
     def selection_changed(self, evt):
         index = evt.widget.curselection()[0] if evt.widget.curselection() else -1
