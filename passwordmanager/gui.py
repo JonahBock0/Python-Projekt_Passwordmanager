@@ -371,6 +371,9 @@ def export_saltfile():
 def import_saltfile():
     filename = filedialog.askopenfilename()
     if filename and check_file(filename):
-        if check_file(crypt.default_salt_filename):  # Alte Salt-Datei sichern
-            write_file(crypt.default_salt_filename + "_old", read_file(crypt.default_salt_filename))
-        write_file(crypt.default_salt_filename, read_file(filename))
+        new_salt = read_file(filename)
+        if check_file(crypt.default_salt_filename):
+            old_salt = read_file(crypt.default_salt_filename)
+            if new_salt != old_salt:
+                write_file(crypt.default_salt_filename + "_old", old_salt)  # Alte Salt-Datei sichern
+        write_file(crypt.default_salt_filename, new_salt)
