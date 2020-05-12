@@ -17,7 +17,7 @@ class Gui:
     def __init__(self):
         self.list_menu = [("[Neue Datenbank]", self.new),
                           ("[Datenbank öffnen]", self.open),
-                          ("[Beenden]", self.close),
+                          ("[Beenden]", self.quit),
                           ("", lambda: self.entry_list.selection_clear(END))]
         self._manager = None
         self._password = None
@@ -45,7 +45,7 @@ class Gui:
         self.root.title("Passwortmanager")
         self.root.minsize(500, 300)
         self.root.geometry("800x500")
-        self.root.protocol("WM_DELETE_WINDOW", self.close)
+        self.root.protocol("WM_DELETE_WINDOW", self.quit)
 
     def setup_menu(self):
         menu = Menu(self.root)
@@ -57,7 +57,8 @@ class Gui:
         menu_db.add_command(label="Speichern", command=self.save)
         menu_db.add_command(label="Speichern unter...", command=self.save_as)
         menu_db.add_separator()
-        menu_db.add_command(label="Speichern und Beenden", command=lambda: self.close(save=True))
+        menu_db.add_command(label="Datenbank schließen", command=self.close)
+        menu_db.add_command(label="Speichern und Beenden", command=lambda: self.quit(save=True))
         menu_saltfile = Menu(menu)
         menu.add_cascade(label="Salt-Datei", menu=menu_saltfile)
         menu_saltfile.add_command(label="Importieren", command=import_saltfile)
@@ -65,7 +66,7 @@ class Gui:
 
     def setup_elements(self):
         root = self.root
-        entry_list = self.entry_list = Listbox(selectmode=BROWSE)
+        entry_list = self.entry_list = Listbox(selectmode=BROWSE, exportselection=0)
         entry_list.grid(row=0, rowspan=6, sticky=N + S + W + E)
         entry_list.bind("<<ListboxSelect>>", self.selection_changed)
 
@@ -98,13 +99,13 @@ class Gui:
         root.rowconfigure(3, pad=3)
 
         Label(text="Notizen:").grid(row=4, column=2, sticky=N + W)
-        self.text_notes = Text(cnf={"height": 3})
+        self.text_notes = Text(height=3)
         self.text_notes.grid(row=4, column=3, sticky=N + S + W + E, pady=3)
         root.rowconfigure(4, pad=3, minsize=30, weight=1)
 
         Label(text="Attribute:").grid(row=5, column=2, sticky=N + W)
         frame_attr = Frame(root)
-        self.list_attributes = Listbox(frame_attr, height=3, selectmode=BROWSE)
+        self.list_attributes = Listbox(frame_attr, height=3, selectmode=BROWSE, exportselection=0)
         self.list_attributes.bind("<<ListboxSelect>>", self.attributes_selection_changed)
         self.list_attributes.grid(row=0, column=0, columnspan=2, sticky=N + S + W + E)
         text_attr_key = Entry(frame_attr, textvariable=self.var_attr_key)
@@ -242,7 +243,19 @@ class Gui:
                 self.var_attr_key.set(selected_attribute[0])
                 self.var_attr_val.set(selected_attribute[1])
 
-    def close(self, save=None):
+    def close(self):
+        if self._manager:
+            answer = messagebox.askyesnocancel("Datenbank schließen", "Speichern?")
+            if answer is None:
+                return
+            elif answer:
+                self.save()
+            self._manager = None
+            self.entry_selected = None
+            self.update_list()
+            self.update_elements()
+
+    def quit(self, save=None):
         if self._manager:
             answer = messagebox.askyesnocancel("Beenden", "Datenbank speichern?") if save is None else save
             if answer is None:
