@@ -22,8 +22,6 @@ class Gui:
         self._filename = None
         self.entry_selected = None
         self.root = Tk()
-        self.setup_root()
-        self.add_menu()
         self.show_password = BooleanVar()
         self.entry_list = None
         self.var_name = StringVar()
@@ -34,7 +32,10 @@ class Gui:
         self.list_attributes = None
         self.var_attr_key = StringVar()
         self.var_attr_val = StringVar()
-        self.add_elements()
+        self.setup_root()
+        self.setup_menu()
+        self.setup_elements()
+        self.update_list()
         crypt.callback_salt_created = lambda x: messagebox.showinfo("Salt-Datei", x)
 
     def setup_root(self):
@@ -43,7 +44,7 @@ class Gui:
         self.root.geometry("800x500")
         self.root.protocol("WM_DELETE_WINDOW", self.close)
 
-    def add_menu(self):
+    def setup_menu(self):
         menu = Menu(self.root)
         self.root.config(menu=menu)
         menu_db = Menu(menu)
@@ -55,9 +56,9 @@ class Gui:
         menu_db.add_separator()
         menu_db.add_command(label="Speichern und Beenden", command=lambda: self.close(save=True))
 
-    def add_elements(self):
-        self.entry_list = Listbox(selectmode=BROWSE)
-        entry_list = self.entry_list
+    def setup_elements(self):
+        root = self.root
+        entry_list = self.entry_list = Listbox(selectmode=BROWSE)
         entry_list.grid(row=0, rowspan=6, sticky=N + S + W + E)
         entry_list.bind("<<ListboxSelect>>", self.selection_changed)
 
@@ -70,20 +71,20 @@ class Gui:
         label_name.grid(row=0, column=2, sticky=W)
         text_name = Entry(textvariable=self.var_name)
         text_name.grid(row=0, column=3, sticky=W + E)
-        Grid.rowconfigure(self.root, 0, pad=3)
+        root.rowconfigure(0, pad=3)
 
         label_user = Label(text="Benutzername:")
         label_user.grid(row=1, column=2, sticky=W)
         text_user = Entry(textvariable=self.var_user)
         text_user.grid(row=1, column=3, sticky=W + E)
-        Grid.rowconfigure(self.root, 1, pad=3)
+        root.rowconfigure(1, pad=3)
 
         label_password = Label(text="Passwort:")
         label_password.grid(row=2, column=2, sticky=W)
         text_password = Entry(show=Gui.passwordsymbol, textvariable=self.var_password)
         text_password.grid(row=2, column=3, sticky=W + E)
-        Grid.rowconfigure(self.root, 2, pad=3)
-        frame_password = Frame(self.root)
+        root.rowconfigure(2, pad=3)
+        frame_password = Frame(root)
         checkbox_showpassword = Checkbutton(frame_password, text="Passwort zeigen", variable=self.show_password,
                                             command=lambda: text_password.config(
                                                 show='' if self.show_password.get() else Gui.passwordsymbol))
@@ -93,17 +94,17 @@ class Gui:
         button_generate_password = Button(frame_password, text="Passwortgenerator", command=self.generate_password)
         button_generate_password.grid(row=0, column=2)
         frame_password.grid(row=3, column=3, sticky=W)
-        Grid.rowconfigure(self.root, 3, pad=3)
+        root.rowconfigure(3, pad=3)
 
         label_notes = Label(text="Notizen:")
         label_notes.grid(row=4, column=2, sticky=N + W)
         self.text_notes = Text(cnf={"height": 3})
         self.text_notes.grid(row=4, column=3, sticky=N + S + W + E, pady=3)
-        Grid.rowconfigure(self.root, 4, pad=3, minsize=30, weight=1)
+        root.rowconfigure(4, pad=3, minsize=30, weight=1)
 
         label_attributes = Label(text="Attribute:")
         label_attributes.grid(row=5, column=2, sticky=N + W)
-        frame_attributes = Frame(self.root)
+        frame_attributes = Frame(root)
         self.list_attributes = Listbox(frame_attributes, height=3, selectmode=BROWSE)
         self.list_attributes.bind("<<ListboxSelect>>", self.attributes_selection_changed)
         self.list_attributes.grid(row=0, column=0, columnspan=2, sticky=N + S + W + E)
@@ -115,26 +116,24 @@ class Gui:
         button_attr_add.grid(row=2, column=0, sticky=E)
         button_attr_add = Button(frame_attributes, text="Entfernen", command=self.attribute_remove)
         button_attr_add.grid(row=2, column=1, sticky=W)
-        frame_attributes.grid_columnconfigure(0, weight=2)
-        frame_attributes.grid_columnconfigure(1, weight=3)
-        frame_attributes.grid_rowconfigure(0, weight=1, minsize=30)
-        frame_attributes.grid_rowconfigure(1, minsize=30)
-        frame_attributes.grid_rowconfigure(2, minsize=30)
+        frame_attributes.columnconfigure(0, weight=2)
+        frame_attributes.columnconfigure(1, weight=3)
+        frame_attributes.rowconfigure(0, weight=1, minsize=30)
+        frame_attributes.rowconfigure(1, minsize=30)
+        frame_attributes.rowconfigure(2, minsize=30)
         frame_attributes.grid(row=5, column=3, sticky=N + S + W + E, pady=3)
-        Grid.rowconfigure(self.root, 5, pad=3, weight=1)
+        root.rowconfigure(5, pad=3, weight=1)
 
         button_add_entry = Button(text="Eintrag hinzufügen", command=self.new_entry)
         button_add_entry.grid(row=6, column=0)
         button_add_entry = Button(text="Eintrag löschen", command=self.delete_entry)
         button_add_entry.grid(row=6, column=1, columnspan=2)
-        Grid.rowconfigure(self.root, 6, pad=3)
+        root.rowconfigure(6, pad=3)
 
         col_weights = [1, 0, 0, 2]
         for col, weight in enumerate(col_weights):
-            Grid.columnconfigure(self.root, col, weight=weight)
-        Grid.columnconfigure(self.root, 0, minsize=130)
-
-        self.update_list()
+            root.columnconfigure(col, weight=weight)
+        root.columnconfigure(0, minsize=130)
 
     def mainloop(self):
         self.root.mainloop()
@@ -164,30 +163,30 @@ class Gui:
                 func()
 
     def update_elements(self):
-        if not self.entry_selected:
-            return
         e = self.entry_selected
-        self.var_name.set(e.name)
-        self.var_user.set(e.user)
-        self.var_password.set(e.password)
-        self.var_attributes = e.attributes
+        self.var_name.set(e.name if e else "")
+        self.var_user.set(e.user if e else "")
+        self.var_password.set(e.password if e else "")
+        self.var_attributes = e.attributes if e else dict()
         self.update_attribute_list()
+        self.var_attr_val.set("")
+        self.var_attr_key.set("")
         self.text_notes.delete("1.0", END)
-        self.text_notes.insert(END, e.notes)
+        if e:
+            self.text_notes.insert(END, e.notes)
 
     def update_entry(self):
-        if not self.entry_selected:
-            return
         e = self.entry_selected
-        name = self.var_name.get()
-        name_changed = e.name != name
-        e.name = name
-        e.user = self.var_user.get()
-        e.password = self.var_password.get()
-        e.attributes = self.var_attributes
-        e.notes = self.text_notes.get("1.0", "end-1c")  # Text aus Textfeld auslesen, zusätzliche Newline entfernen
-        if name_changed:  # Liste aktualisieren, wenn sich der Name geändert hat
-            self.update_list()
+        if e:
+            name = self.var_name.get()
+            name_changed = e.name != name
+            e.name = name
+            e.user = self.var_user.get()
+            e.password = self.var_password.get()
+            e.attributes = self.var_attributes
+            e.notes = self.text_notes.get("1.0", "end-1c")  # Text aus Textfeld auslesen, zusätzliche Newline entfernen
+            if name_changed:  # Liste aktualisieren, wenn sich der Name geändert hat
+                self.update_list()
 
     def new_entry(self):
         if not self._manager:
@@ -201,33 +200,40 @@ class Gui:
 
     def delete_entry(self):
         if self._manager and self.entry_selected:
-            if messagebox.askyesno("Löschen?", f"Wirklich '{self.entry_selected.name}' löschen?"):
+            if messagebox.askyesno("Löschen?", f"'{self.entry_selected.name}' wirklich  löschen?"):
                 self._manager.remove_entry(self.entry_selected)
+                self.entry_selected = None
+                self.update_elements()
                 self.update_list()
 
     def update_attribute_list(self):
         self.list_attributes.delete(0, END)
-        for key, val in self.var_attributes.items():
-            self.list_attributes.insert(END, f"{key}:  {val}")
+        if self._manager and self.entry_selected:
+            for key, val in self.var_attributes.items():
+                self.list_attributes.insert(END, f"{key}:  {val}")
 
     def attribute_apply(self):
-        if self.var_attr_val.get():
-            self.var_attributes[self.var_attr_key.get()] = self.var_attr_val.get()
-            self.update_attribute_list()
+        if self._manager and self.entry_selected:
+            key = self.var_attr_key.get()
+            val = self.var_attr_val.get()
+            if key:
+                self.var_attributes[key] = val
+                self.update_attribute_list()
 
     def attribute_remove(self):
-        if self.var_attr_val.get():
-            del self.var_attributes[self.var_attr_key.get()]
-            self.update_attribute_list()
+        if self._manager and self.entry_selected:
+            key = self.var_attr_key.get()
+            if key and key in self.var_attributes:
+                del self.var_attributes[key]
+                self.update_attribute_list()
 
     def attributes_selection_changed(self, evt):
-        if not self._manager or not self.entry_selected:
-            return
-        index = evt.widget.curselection()[0] if evt.widget.curselection() else -1
-        if index >= 0:
-            selected_attribute = list(self.entry_selected.attributes.items())[index]
-            self.var_attr_key.set(selected_attribute[0])
-            self.var_attr_val.set(selected_attribute[1])
+        if self._manager and self.entry_selected:
+            index = evt.widget.curselection()[0] if evt.widget.curselection() else -1
+            if index >= 0:
+                selected_attribute = list(self.entry_selected.attributes.items())[index]
+                self.var_attr_key.set(selected_attribute[0])
+                self.var_attr_val.set(selected_attribute[1])
 
     def close(self, save=None):
         if self._manager:
@@ -341,8 +347,7 @@ class Passwordgenerator(simpledialog.Dialog):
 
     def validate(self):
         length = int(self.length.get()) if self.length.get() else 0
-        if length > 0 and (
-                self.letters.get() or self.digits.get() or self.punctuation.get() or self.space.get()):
+        if length > 0 and any([self.letters.get(), self.digits.get(), self.punctuation.get(), self.space.get()]):
             password = generate_password(length, exclude=self.exclude.get(),
                                          letters=self.letters.get(), digits=self.digits.get(),
                                          punctuation=self.punctuation.get(), space=self.space.get())
