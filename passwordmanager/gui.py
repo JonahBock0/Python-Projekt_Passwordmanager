@@ -6,6 +6,7 @@ from cryptography.fernet import InvalidToken
 
 from . import crypt
 from .entry import Entry as PEntry
+from .files import read_file, write_file, check_file
 from .generator import generate_password
 from .manager import open_manager_from_file, save_manager_to_file, Manager
 
@@ -55,6 +56,10 @@ class Gui:
         menu_db.add_command(label="Speichern unter...", command=self.save_as)
         menu_db.add_separator()
         menu_db.add_command(label="Speichern und Beenden", command=lambda: self.close(save=True))
+        menu_saltfile = Menu(menu)
+        menu.add_cascade(label="Salt-Datei", menu=menu_saltfile)
+        menu_saltfile.add_command(label="Importieren", command=import_saltfile)
+        menu_saltfile.add_command(label="Exportieren", command=export_saltfile)
 
     def setup_elements(self):
         root = self.root
@@ -354,3 +359,18 @@ class Passwordgenerator(simpledialog.Dialog):
             self.password = password if password else None
             return bool(self.password)
         return False
+
+
+def export_saltfile():
+    if check_file(crypt.default_salt_filename):
+        filename = filedialog.asksaveasfilename()
+        if filename:
+            write_file(filename, read_file(crypt.default_salt_filename))
+
+
+def import_saltfile():
+    filename = filedialog.askopenfilename()
+    if filename and check_file(filename):
+        if check_file(crypt.default_salt_filename):  # Alte Salt-Datei sichern
+            write_file(crypt.default_salt_filename + "_old", read_file(crypt.default_salt_filename))
+        write_file(crypt.default_salt_filename, read_file(filename))

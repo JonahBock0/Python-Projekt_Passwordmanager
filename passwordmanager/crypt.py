@@ -9,9 +9,10 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from .files import read_file, write_file
 
 callback_salt_created = print
+default_salt_filename = "passwordmanager.salt"
 
 
-def get_or_create_salt(size: int, filename: str = "passwordmanager.salt") -> bytes:
+def get_or_create_salt(size: int, filename: str = default_salt_filename) -> bytes:
     try:
         return read_file(filename, "rb")
     except FileNotFoundError:
