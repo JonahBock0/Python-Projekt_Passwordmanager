@@ -72,61 +72,52 @@ class Gui:
         entry_scrollbar.config(command=entry_list.yview)
         entry_scrollbar.grid(row=0, column=1, rowspan=6, sticky=N + S + W)
 
-        label_name = Label(text="Name:")
-        label_name.grid(row=0, column=2, sticky=W)
+        Label(text="Name:").grid(row=0, column=2, sticky=W)
         text_name = Entry(textvariable=self.var_name)
         text_name.grid(row=0, column=3, sticky=W + E)
         root.rowconfigure(0, pad=3)
 
-        label_user = Label(text="Benutzername:")
-        label_user.grid(row=1, column=2, sticky=W)
+        Label(text="Benutzername:").grid(row=1, column=2, sticky=W)
         text_user = Entry(textvariable=self.var_user)
         text_user.grid(row=1, column=3, sticky=W + E)
         root.rowconfigure(1, pad=3)
 
-        label_password = Label(text="Passwort:")
-        label_password.grid(row=2, column=2, sticky=W)
+        Label(text="Passwort:").grid(row=2, column=2, sticky=W)
         text_password = Entry(show=Gui.passwordsymbol, textvariable=self.var_password)
         text_password.grid(row=2, column=3, sticky=W + E)
         root.rowconfigure(2, pad=3)
         frame_password = Frame(root)
-        checkbox_showpassword = Checkbutton(frame_password, text="Passwort zeigen", variable=self.show_password,
-                                            command=lambda: text_password.config(
-                                                show='' if self.show_password.get() else Gui.passwordsymbol))
-        checkbox_showpassword.grid(row=0, column=0)
-        button_copy_password = Button(frame_password, text="Passwort kopieren", command=self.copy_password)
-        button_copy_password.grid(row=0, column=1)
-        button_generate_password = Button(frame_password, text="Passwortgenerator", command=self.generate_password)
-        button_generate_password.grid(row=0, column=2)
+        Checkbutton(frame_password, text="Passwort zeigen", variable=self.show_password,
+                    command=lambda: text_password.config(show='' if self.show_password.get() else Gui.passwordsymbol)
+                    ).grid(row=0, column=0)
+        Button(frame_password, text="Passwort kopieren", command=self.copy_password).grid(row=0, column=1)
+        Button(frame_password, text="Passwortgenerator", command=self.generate_password).grid(row=0, column=2)
         frame_password.grid(row=3, column=3, sticky=W)
         root.rowconfigure(3, pad=3)
 
-        label_notes = Label(text="Notizen:")
-        label_notes.grid(row=4, column=2, sticky=N + W)
+        Label(text="Notizen:").grid(row=4, column=2, sticky=N + W)
         self.text_notes = Text(cnf={"height": 3})
         self.text_notes.grid(row=4, column=3, sticky=N + S + W + E, pady=3)
         root.rowconfigure(4, pad=3, minsize=30, weight=1)
 
-        label_attributes = Label(text="Attribute:")
-        label_attributes.grid(row=5, column=2, sticky=N + W)
-        frame_attributes = Frame(root)
-        self.list_attributes = Listbox(frame_attributes, height=3, selectmode=BROWSE)
+        Label(text="Attribute:").grid(row=5, column=2, sticky=N + W)
+        frame_attr = Frame(root)
+        self.list_attributes = Listbox(frame_attr, height=3, selectmode=BROWSE)
         self.list_attributes.bind("<<ListboxSelect>>", self.attributes_selection_changed)
         self.list_attributes.grid(row=0, column=0, columnspan=2, sticky=N + S + W + E)
-        text_attr_key = Entry(frame_attributes, textvariable=self.var_attr_key)
+        text_attr_key = Entry(frame_attr, textvariable=self.var_attr_key)
         text_attr_key.grid(row=1, column=0, sticky=W + E)
-        text_attr_val = Entry(frame_attributes, textvariable=self.var_attr_val)
+        text_attr_val = Entry(frame_attr, textvariable=self.var_attr_val)
         text_attr_val.grid(row=1, column=1, sticky=W + E)
-        button_attr_add = Button(frame_attributes, text="Hinzufügen/Aktualisieren", command=self.attribute_apply)
-        button_attr_add.grid(row=2, column=0, sticky=E)
-        button_attr_add = Button(frame_attributes, text="Entfernen", command=self.attribute_remove)
-        button_attr_add.grid(row=2, column=1, sticky=W)
-        frame_attributes.columnconfigure(0, weight=2)
-        frame_attributes.columnconfigure(1, weight=3)
-        frame_attributes.rowconfigure(0, weight=1, minsize=30)
-        frame_attributes.rowconfigure(1, minsize=30)
-        frame_attributes.rowconfigure(2, minsize=30)
-        frame_attributes.grid(row=5, column=3, sticky=N + S + W + E, pady=3)
+        Button(frame_attr, text="Hinzufügen/Aktualisieren", command=self.attribute_apply
+               ).grid(row=2, column=0, sticky=E)
+        Button(frame_attr, text="Entfernen", command=self.attribute_remove).grid(row=2, column=1, sticky=W)
+        frame_attr.columnconfigure(0, weight=2)
+        frame_attr.columnconfigure(1, weight=3)
+        frame_attr.rowconfigure(0, weight=1, minsize=30)
+        frame_attr.rowconfigure(1, minsize=30)
+        frame_attr.rowconfigure(2, minsize=30)
+        frame_attr.grid(row=5, column=3, sticky=N + S + W + E, pady=3)
         root.rowconfigure(5, pad=3, weight=1)
 
         button_add_entry = Button(text="Eintrag hinzufügen", command=self.new_entry)
@@ -287,6 +278,8 @@ class Gui:
             except Exception as e:
                 messagebox.showerror("Fehler!", str(e))
         else:
+            if self._manager and messagebox.askyesno("Öffnen", "Aktuelle Datenbank speichern?"):
+                self.save()  # Nach Nachfrage die aktuelle Datenbank vor dem Öffnen speichern
             filename = filedialog.askopenfilename()
             if filename:
                 self._filename = filename
