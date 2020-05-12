@@ -17,7 +17,8 @@ class Gui:
     def __init__(self):
         self.list_menu = [("[Neue Datenbank]", self.new),
                           ("[Datenbank öffnen]", self.open),
-                          ("[Beenden]", self.close)]
+                          ("[Beenden]", self.close),
+                          ("", lambda: self.entry_list.selection_clear(END))]
         self._manager = None
         self._password = None
         self._filename = None
@@ -33,6 +34,7 @@ class Gui:
         self.list_attributes = None
         self.var_attr_key = StringVar()
         self.var_attr_val = StringVar()
+        self.input_elements = []
         self.setup_root()
         self.setup_menu()
         self.setup_elements()
@@ -130,6 +132,7 @@ class Gui:
         for col, weight in enumerate(col_weights):
             root.columnconfigure(col, weight=weight)
         root.columnconfigure(0, minsize=130)
+        self.input_elements = [text_name, text_user, text_password, self.text_notes, text_attr_key, text_attr_val]
 
     def mainloop(self):
         self.root.mainloop()
@@ -144,6 +147,12 @@ class Gui:
         else:
             for text, func in self.list_menu:
                 self.entry_list.insert(END, text)
+        self.update_input_state()
+
+    def update_input_state(self):
+        state = NORMAL if self._manager and self.entry_selected else DISABLED
+        for input_element in self.input_elements:
+            input_element['state'] = state
 
     def selection_changed(self, evt):
         index = evt.widget.curselection()[0] if evt.widget.curselection() else -1
@@ -153,6 +162,7 @@ class Gui:
             if index >= 0:
                 self.entry_selected = self._manager.get_entries()[index]
                 self.update_elements()
+            self.update_input_state()
         else:
             func = self.list_menu[index][1] if index >= 0 else None
             if func:
@@ -193,6 +203,7 @@ class Gui:
         self.entry_list.select_set(END, END)
         self.entry_selected = entry
         self.update_elements()
+        self.update_input_state()
 
     def delete_entry(self):
         if self._manager and self.entry_selected:
