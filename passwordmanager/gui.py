@@ -225,10 +225,13 @@ class Gui:
                 self.update_list()
 
     def update_attribute_list(self):
+        state = self.text_notes["state"]  # state speichern
+        self.list_attributes["state"] = NORMAL  # ...zum Bearbeiten auf NORMAL setzen
         self.list_attributes.delete(0, END)
         if self._manager and self.entry_selected:
             for key, val in self.var_attributes.items():
                 self.list_attributes.insert(END, f"{key}:  {val}")
+        self.list_attributes["state"] = state  # ...und auf den vorherigen Wert setzen
 
     def attribute_apply(self):
         if self._manager and self.entry_selected:
