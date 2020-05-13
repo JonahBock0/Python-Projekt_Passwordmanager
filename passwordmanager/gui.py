@@ -15,7 +15,7 @@ class Gui:
     passwordsymbol = "•"
 
     def __init__(self):
-        self.list_menu = [("[Neue Datenbank]", self.new),
+        self.list_menu = [("[Neue Datenbank]", self.new),  # Menü für die Liste, wenn keine Datenbank geöffnet ist
                           ("[Datenbank öffnen]", self.open),
                           ("[Beenden]", self.quit),
                           ("", lambda: self.entry_list.selection_clear(END))]
@@ -130,6 +130,7 @@ class Gui:
         self.root.mainloop()
 
     def update_list(self):
+        """Liste mit Einträgen auffüllen, oder mit dem Listenmenü, wenn keine Datenbank geöffnet ist"""
         self.entry_list.delete(0, END)
         if self._manager:
             if self.entry_selected:
@@ -142,6 +143,7 @@ class Gui:
         self.update_input_state()
 
     def update_input_state(self):
+        """Elemente aktivieren oder deaktivieren, abhängig davon, ob ein Eintrag ausgewählt ist"""
         state = NORMAL if self._manager and self.entry_selected else DISABLED
         for element in self.root.children.values():
             self.set_state(
@@ -149,6 +151,7 @@ class Gui:
                 lambda e: e is not self.entry_list and isinstance(e, (Entry, Button, Text, Checkbutton, Listbox)))
 
     def set_state(self, element, state, test=lambda e: True):
+        """state eines Elementes setzen"""
         if element.children:
             for e in element.children.values():
                 self.set_state(e, state, test)
@@ -170,6 +173,7 @@ class Gui:
                 func()
 
     def update_elements(self):
+        """Eingabeelemente mit Eigenschaften des ausgewählten Eintrags füllen, sonst leeren"""
         e = self.entry_selected
         self.var_name.set(e.name if e else "")
         self.var_user.set(e.user if e else "")
@@ -186,6 +190,7 @@ class Gui:
         self.text_notes["state"] = text_notes_state  # ...und auf den vorherigen Wert setzen
 
     def update_entry(self):
+        """Inhalte der Eingabeelemente in den Eintrag speichern"""
         e = self.entry_selected
         if e:
             name = self.var_name.get()
@@ -274,7 +279,7 @@ class Gui:
         if self._manager:
             if self._filename:
                 if self.entry_selected:
-                    self.update_entry()
+                    self.update_entry()  # Aktuelle eingegebene Werte vor dem Speichern übertragen
                 if self._password:
                     save_manager_to_file(self._manager, filename=self._filename, password=self._password)
                 elif password:

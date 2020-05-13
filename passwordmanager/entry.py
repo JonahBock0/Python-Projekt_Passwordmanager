@@ -1,4 +1,5 @@
 def entry_from_string(from_string: str):
+    """Erzeugt einen Eintrag aus einem String"""
     lines = from_string.splitlines()
     name = lines[0]
     user = lines[1]
@@ -24,7 +25,8 @@ class Entry:
             self.attributes = dict()
 
     def to_string(self) -> str:
-        notes_lines = self.notes.count("\n") + 1
+        """Erzeugt aus dem Eintrag einen String"""
+        notes_lines = self.notes.count("\n") + 1  # Anzahl der Zeilen, die die Notizen verbrauchen
         attributes = []
         for key, val in self.attributes.items():
             attributes.append(f"{key}\n{val}")
