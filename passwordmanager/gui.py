@@ -32,6 +32,7 @@ class Gui:
         self.text_notes = None
         self.var_attributes = dict()
         self.list_attributes = None
+        self.button_new = None
         self.var_attr_key = StringVar()
         self.var_attr_val = StringVar()
         self.setup_root()
@@ -117,7 +118,8 @@ class Gui:
         frame_attr.grid(row=5, column=3, sticky=N + S + W + E, pady=3)
         root.rowconfigure(5, pad=3, weight=1)
 
-        Button(text="Eintrag hinzufügen", command=self.new_entry).grid(row=6, column=0)
+        self.button_new = Button(text="Eintrag hinzufügen", command=self.new_entry)
+        self.button_new.grid(row=6, column=0)
         Button(text="Eintrag löschen", command=self.delete_entry).grid(row=6, column=1, columnspan=2)
         root.rowconfigure(6, pad=3)
 
@@ -149,6 +151,7 @@ class Gui:
             self.set_state(
                 element, state,
                 lambda e: e is not self.entry_list and isinstance(e, (Entry, Button, Text, Checkbutton, Listbox)))
+        self.set_state(self.button_new, NORMAL if self._manager else DISABLED)
 
     def set_state(self, element, state, test=lambda e: True):
         """state eines Elementes setzen"""
