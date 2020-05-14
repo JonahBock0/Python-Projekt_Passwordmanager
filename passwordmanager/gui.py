@@ -31,7 +31,8 @@ class Gui:
         self.var_password = StringVar()
         self.text_notes = None
         self.var_attributes = dict()
-        self.list_attributes = None
+        self.list_attr_1 = None
+        self.list_attr_2 = None
         self.button_new = None
         self.var_attr_key = StringVar()
         self.var_attr_val = StringVar()
@@ -43,7 +44,7 @@ class Gui:
 
     def setup_root(self):
         self.root.title("Passwortmanager")
-        self.root.minsize(500, 300)
+        self.root.minsize(600, 300)
         self.root.geometry("800x500")
         self.root.protocol("WM_DELETE_WINDOW", self.quit)
 
@@ -109,12 +110,24 @@ class Gui:
 
         Label(text="Attribute:").grid(row=5, column=1, sticky=N + W)
         frame_attr = Frame(root)
-        self.list_attributes = Listbox(frame_attr, height=3, selectmode=BROWSE, exportselection=0)
-        self.list_attributes.bind("<<ListboxSelect>>", self.attributes_selection_changed)
-        self.list_attributes.grid(row=0, column=0, columnspan=2, sticky=N + S + W + E)
-        scrollbar_attributes = Scrollbar(frame_attr, orient=VERTICAL, command=self.list_attributes.yview)
+        self.list_attr_1 = Listbox(frame_attr, height=3, selectmode=BROWSE, exportselection=0)
+        self.list_attr_2 = Listbox(frame_attr, height=3, selectmode=BROWSE, exportselection=0)
+        self.list_attr_1.bind("<<ListboxSelect>>", self.attributes_selection_changed)
+        self.list_attr_2.bind("<<ListboxSelect>>", self.attributes_selection_changed)
+        self.list_attr_1.grid(row=0, column=0, sticky=N + S + W + E)
+        self.list_attr_2.grid(row=0, column=1, sticky=N + S + W + E)
+        scrollbar_attributes = Scrollbar(frame_attr, orient=VERTICAL,  # Beide Listen scrollen
+                                         command=lambda *args: [self.list_attr_1.yview(*args),
+                                                                self.list_attr_2.yview(*args)])
         scrollbar_attributes.grid(row=0, column=2, sticky=N + S)
-        self.list_attributes.config(yscrollcommand=scrollbar_attributes.set)
+        # Scrollposition synchronisieren
+        self.list_attr_1.config(yscrollcommand=lambda *args: [
+            self.list_attr_2.yview_moveto(args[0]) if self.list_attr_1.yview() != self.list_attr_2.yview() else None,
+            scrollbar_attributes.set(*args)])
+        self.list_attr_2.config(yscrollcommand=lambda *args: [
+            self.list_attr_1.yview_moveto(args[0]) if self.list_attr_1.yview() != self.list_attr_2.yview() else None,
+            scrollbar_attributes.set(*args)])
+
         Entry(frame_attr, textvariable=self.var_attr_key).grid(row=1, column=0, sticky=W + E)
         Entry(frame_attr, textvariable=self.var_attr_val).grid(row=1, column=1, sticky=W + E)
         Button(frame_attr, text="Hinzufügen/Aktualisieren", command=self.attribute_apply
@@ -123,7 +136,7 @@ class Gui:
         frame_attr.columnconfigure(0, weight=2)
         frame_attr.columnconfigure(1, weight=3)
         frame_attr.rowconfigure(0, weight=1, minsize=30)
-        frame_attr.rowconfigure(1, minsize=30)
+        frame_attr.rowconfigure(1, weight=2, minsize=30)
         frame_attr.rowconfigure(2, minsize=30)
         frame_attr.grid(row=5, column=2, columnspan=2, sticky=N + S + W + E, pady=3)
         root.rowconfigure(5, pad=3, weight=1)
@@ -236,13 +249,15 @@ class Gui:
                 self.update_list()
 
     def update_attribute_list(self):
-        state = self.text_notes["state"]  # state speichern
-        self.list_attributes["state"] = NORMAL  # ...zum Bearbeiten auf NORMAL setzen
-        self.list_attributes.delete(0, END)
+        state = self.list_attr_1["state"]  # state speichern
+        self.list_attr_1["state"] = self.list_attr_2["state"] = NORMAL  # ...zum Bearbeiten auf NORMAL setzen
+        self.list_attr_1.delete(0, END)
+        self.list_attr_2.delete(0, END)
         if self._manager and self.entry_selected:
             for key, val in self.var_attributes.items():
-                self.list_attributes.insert(END, f"{key}:  {val}")
-        self.list_attributes["state"] = state  # ...und auf den vorherigen Wert setzen
+                self.list_attr_1.insert(END, key)
+                self.list_attr_2.insert(END, val)
+        self.list_attr_1["state"] = self.list_attr_2["state"] = state  # ...und auf den vorherigen Wert setzen
 
     def attribute_apply(self):
         if self._manager and self.entry_selected:
@@ -263,6 +278,10 @@ class Gui:
         if self._manager and self.entry_selected:
             index = evt.widget.curselection()[0] if evt.widget.curselection() else -1
             if index >= 0:
+                self.list_attr_1.select_clear(0, END)
+                self.list_attr_2.select_clear(0, END)
+                self.list_attr_1.select_set(index)
+                self.list_attr_2.select_set(index)
                 selected_attribute = list(self.entry_selected.attributes.items())[index]
                 self.var_attr_key.set(selected_attribute[0])
                 self.var_attr_val.set(selected_attribute[1])
