@@ -67,28 +67,28 @@ class Gui:
     def setup_elements(self):
         root = self.root
         frame_list = Frame(root)
-        entry_list = self.list_entries = Listbox(frame_list, selectmode=BROWSE, exportselection=0)
-        entry_list.grid(row=0, column=0, sticky=N + S + W + E)
-        entry_list.bind("<<ListboxSelect>>", self.selection_changed)
+        list_entries = self.list_entries = Listbox(frame_list, selectmode=BROWSE, exportselection=0)
+        list_entries.grid(row=0, column=0, sticky=N + S + W + E)
+        list_entries.bind("<<ListboxSelect>>", self.selection_changed)
 
-        entry_scrollbar = Scrollbar(frame_list, orient=VERTICAL, command=entry_list.yview)
-        entry_list.config(yscrollcommand=entry_scrollbar.set)
-        entry_scrollbar.grid(row=0, column=1, sticky=N + S + W + E)
+        scrollbar_entries = Scrollbar(frame_list, orient=VERTICAL, command=list_entries.yview)
+        list_entries.config(yscrollcommand=scrollbar_entries.set)
+        scrollbar_entries.grid(row=0, column=1, sticky=N + S + W + E)
         frame_list.rowconfigure(0, weight=1)
         frame_list.columnconfigure(0, weight=1)
         frame_list.grid(row=0, column=0, rowspan=6, sticky=N + S + W + E)
 
         Label(text="Name:").grid(row=0, column=1, sticky=W)
-        Entry(textvariable=self.var_name).grid(row=0, column=2, sticky=W + E)
+        Entry(textvariable=self.var_name).grid(row=0, column=2, columnspan=2, sticky=W + E)
         root.rowconfigure(0, pad=3)
 
         Label(text="Benutzername:").grid(row=1, column=1, sticky=W)
-        Entry(textvariable=self.var_user).grid(row=1, column=2, sticky=W + E)
+        Entry(textvariable=self.var_user).grid(row=1, column=2, columnspan=2, sticky=W + E)
         root.rowconfigure(1, pad=3)
 
         Label(text="Passwort:").grid(row=2, column=1, sticky=W)
         text_password = Entry(show=Gui.passwordsymbol, textvariable=self.var_password)
-        text_password.grid(row=2, column=2, sticky=W + E)
+        text_password.grid(row=2, column=2, columnspan=2, sticky=W + E)
         root.rowconfigure(2, pad=3)
         frame_password = Frame(root)
         Checkbutton(frame_password, text="Passwort zeigen", variable=self.show_password,
@@ -96,12 +96,15 @@ class Gui:
                     ).grid(row=0, column=0)
         Button(frame_password, text="Passwort kopieren", command=self.copy_password).grid(row=0, column=1)
         Button(frame_password, text="Passwortgenerator", command=self.generate_password).grid(row=0, column=2)
-        frame_password.grid(row=3, column=2, sticky=W)
+        frame_password.grid(row=3, column=2, columnspan=2, sticky=W)
         root.rowconfigure(3, pad=3)
 
         Label(text="Notizen:").grid(row=4, column=1, sticky=N + W)
         self.text_notes = Text(height=3)
         self.text_notes.grid(row=4, column=2, sticky=N + S + W + E, pady=3)
+        scrollbar_notes = Scrollbar(orient=VERTICAL, command=self.text_notes.yview)
+        scrollbar_notes.grid(row=4, column=3, sticky=N + S)
+        self.text_notes.config(yscrollcommand=scrollbar_notes.set)
         root.rowconfigure(4, pad=3, minsize=30, weight=1)
 
         Label(text="Attribute:").grid(row=5, column=1, sticky=N + W)
@@ -109,6 +112,9 @@ class Gui:
         self.list_attributes = Listbox(frame_attr, height=3, selectmode=BROWSE, exportselection=0)
         self.list_attributes.bind("<<ListboxSelect>>", self.attributes_selection_changed)
         self.list_attributes.grid(row=0, column=0, columnspan=2, sticky=N + S + W + E)
+        scrollbar_attributes = Scrollbar(frame_attr, orient=VERTICAL, command=self.list_attributes.yview)
+        scrollbar_attributes.grid(row=0, column=2, sticky=N + S)
+        self.list_attributes.config(yscrollcommand=scrollbar_attributes.set)
         Entry(frame_attr, textvariable=self.var_attr_key).grid(row=1, column=0, sticky=W + E)
         Entry(frame_attr, textvariable=self.var_attr_val).grid(row=1, column=1, sticky=W + E)
         Button(frame_attr, text="Hinzufügen/Aktualisieren", command=self.attribute_apply
@@ -119,7 +125,7 @@ class Gui:
         frame_attr.rowconfigure(0, weight=1, minsize=30)
         frame_attr.rowconfigure(1, minsize=30)
         frame_attr.rowconfigure(2, minsize=30)
-        frame_attr.grid(row=5, column=2, sticky=N + S + W + E, pady=3)
+        frame_attr.grid(row=5, column=2, columnspan=2, sticky=N + S + W + E, pady=3)
         root.rowconfigure(5, pad=3, weight=1)
 
         self.button_new = Button(text="Eintrag hinzufügen", command=self.new_entry)
