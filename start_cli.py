@@ -2,5 +2,5 @@ try:
     from passwordmanager import cli
 
     cli.cli()
-except ModuleNotFoundError:
-    print("Das Modul 'cryptography' ist erforderlich, aber nicht installiert")
+except ModuleNotFoundError as e:
+    print(f"Das Modul {e.name} fehlt, bitte mit 'pip install {e.name}' installieren")
