@@ -18,14 +18,14 @@ class Gui:
         self.list_menu = [("[Neue Datenbank]", self.new),  # Menü für die Liste, wenn keine Datenbank geöffnet ist
                           ("[Datenbank öffnen]", self.open),
                           ("[Beenden]", self.quit),
-                          ("", lambda: self.entry_list.selection_clear(END))]
+                          ("", lambda: self.list_entries.selection_clear(END))]
         self._manager = None
         self._password = None
         self._filename = None
         self.entry_selected = None
         self.root = Tk()
         self.show_password = BooleanVar()
-        self.entry_list = None
+        self.list_entries = None
         self.var_name = StringVar()
         self.var_user = StringVar()
         self.var_password = StringVar()
@@ -66,25 +66,29 @@ class Gui:
 
     def setup_elements(self):
         root = self.root
-        entry_list = self.entry_list = Listbox(selectmode=BROWSE, exportselection=0)
-        entry_list.grid(row=0, rowspan=6, sticky=N + S + W + E)
+        frame_list = Frame(root)
+        entry_list = self.list_entries = Listbox(frame_list, selectmode=BROWSE, exportselection=0)
+        entry_list.grid(row=0, column=0, sticky=N + S + W + E)
         entry_list.bind("<<ListboxSelect>>", self.selection_changed)
 
-        entry_scrollbar = Scrollbar(orient=VERTICAL, command=entry_list.yview)
+        entry_scrollbar = Scrollbar(frame_list, orient=VERTICAL, command=entry_list.yview)
         entry_list.config(yscrollcommand=entry_scrollbar.set)
-        entry_scrollbar.grid(row=0, column=1, rowspan=6, sticky=N + S + W)
+        entry_scrollbar.grid(row=0, column=1, sticky=N + S + W + E)
+        frame_list.rowconfigure(0, weight=1)
+        frame_list.columnconfigure(0, weight=1)
+        frame_list.grid(row=0, column=0, rowspan=6, sticky=N + S + W + E)
 
-        Label(text="Name:").grid(row=0, column=2, sticky=W)
-        Entry(textvariable=self.var_name).grid(row=0, column=3, sticky=W + E)
+        Label(text="Name:").grid(row=0, column=1, sticky=W)
+        Entry(textvariable=self.var_name).grid(row=0, column=2, sticky=W + E)
         root.rowconfigure(0, pad=3)
 
-        Label(text="Benutzername:").grid(row=1, column=2, sticky=W)
-        Entry(textvariable=self.var_user).grid(row=1, column=3, sticky=W + E)
+        Label(text="Benutzername:").grid(row=1, column=1, sticky=W)
+        Entry(textvariable=self.var_user).grid(row=1, column=2, sticky=W + E)
         root.rowconfigure(1, pad=3)
 
-        Label(text="Passwort:").grid(row=2, column=2, sticky=W)
+        Label(text="Passwort:").grid(row=2, column=1, sticky=W)
         text_password = Entry(show=Gui.passwordsymbol, textvariable=self.var_password)
-        text_password.grid(row=2, column=3, sticky=W + E)
+        text_password.grid(row=2, column=2, sticky=W + E)
         root.rowconfigure(2, pad=3)
         frame_password = Frame(root)
         Checkbutton(frame_password, text="Passwort zeigen", variable=self.show_password,
@@ -92,15 +96,15 @@ class Gui:
                     ).grid(row=0, column=0)
         Button(frame_password, text="Passwort kopieren", command=self.copy_password).grid(row=0, column=1)
         Button(frame_password, text="Passwortgenerator", command=self.generate_password).grid(row=0, column=2)
-        frame_password.grid(row=3, column=3, sticky=W)
+        frame_password.grid(row=3, column=2, sticky=W)
         root.rowconfigure(3, pad=3)
 
-        Label(text="Notizen:").grid(row=4, column=2, sticky=N + W)
+        Label(text="Notizen:").grid(row=4, column=1, sticky=N + W)
         self.text_notes = Text(height=3)
-        self.text_notes.grid(row=4, column=3, sticky=N + S + W + E, pady=3)
+        self.text_notes.grid(row=4, column=2, sticky=N + S + W + E, pady=3)
         root.rowconfigure(4, pad=3, minsize=30, weight=1)
 
-        Label(text="Attribute:").grid(row=5, column=2, sticky=N + W)
+        Label(text="Attribute:").grid(row=5, column=1, sticky=N + W)
         frame_attr = Frame(root)
         self.list_attributes = Listbox(frame_attr, height=3, selectmode=BROWSE, exportselection=0)
         self.list_attributes.bind("<<ListboxSelect>>", self.attributes_selection_changed)
@@ -115,15 +119,15 @@ class Gui:
         frame_attr.rowconfigure(0, weight=1, minsize=30)
         frame_attr.rowconfigure(1, minsize=30)
         frame_attr.rowconfigure(2, minsize=30)
-        frame_attr.grid(row=5, column=3, sticky=N + S + W + E, pady=3)
+        frame_attr.grid(row=5, column=2, sticky=N + S + W + E, pady=3)
         root.rowconfigure(5, pad=3, weight=1)
 
         self.button_new = Button(text="Eintrag hinzufügen", command=self.new_entry)
         self.button_new.grid(row=6, column=0)
-        Button(text="Eintrag löschen", command=self.delete_entry).grid(row=6, column=1, columnspan=2)
+        Button(text="Eintrag löschen", command=self.delete_entry).grid(row=6, column=1)
         root.rowconfigure(6, pad=3)
 
-        col_weights = [1, 0, 0, 2]
+        col_weights = [1, 0, 2]
         for col, weight in enumerate(col_weights):
             root.columnconfigure(col, weight=weight)
         root.columnconfigure(0, minsize=130)
@@ -133,15 +137,15 @@ class Gui:
 
     def update_list(self):
         """Liste mit Einträgen auffüllen, oder mit dem Listenmenü, wenn keine Datenbank geöffnet ist"""
-        self.entry_list.delete(0, END)
+        self.list_entries.delete(0, END)
         if self._manager:
             if self.entry_selected:
                 self.update_entry()
             for entry in self._manager.get_entries():
-                self.entry_list.insert(END, entry.name)
+                self.list_entries.insert(END, entry.name)
         else:
             for text, func in self.list_menu:
-                self.entry_list.insert(END, text)
+                self.list_entries.insert(END, text)
         self.update_input_state()
 
     def update_input_state(self):
@@ -150,7 +154,7 @@ class Gui:
         for element in self.root.children.values():
             self.set_state(
                 element, state,
-                lambda e: e is not self.entry_list and isinstance(e, (Entry, Button, Text, Checkbutton, Listbox)))
+                lambda e: e is not self.list_entries and isinstance(e, (Entry, Button, Text, Checkbutton, Listbox)))
         self.set_state(self.button_new, NORMAL if self._manager else DISABLED)
 
     def set_state(self, element, state, test=lambda e: True):
@@ -212,7 +216,7 @@ class Gui:
         entry = PEntry(name="Neuer Eintrag")
         self._manager.add_entry(entry)
         self.update_list()
-        self.entry_list.select_set(END, END)
+        self.list_entries.select_set(END, END)
         self.entry_selected = entry
         self.update_elements()
         self.update_input_state()
@@ -365,6 +369,7 @@ class Passwordgenerator(simpledialog.Dialog):
         self.letters = BooleanVar(value=True)
         self.space = BooleanVar(value=True)
         self.password = None
+        self.minsize(200, 150)
         frame = Frame(self)
         Label(frame, text="Länge:").grid(row=0, column=0, sticky=W)
         val = (self.register(lambda newval: newval.isnumeric() or not newval), '%P')
@@ -377,8 +382,8 @@ class Passwordgenerator(simpledialog.Dialog):
         Label(frame, text="Zeichen ausschließen:").grid(row=5, column=0, sticky=W)
         val = (self.register(lambda action, prev, new: int(action) != 1 or new not in prev), '%d', '%s', '%S')
         Entry(frame, textvariable=self.exclude, validate="all", validatecommand=val).grid(row=5, column=1, sticky=W + E)
-        frame.columnconfigure(0, weight=1)
-        frame.columnconfigure(1, weight=2)
+        frame.columnconfigure(0, weight=1, minsize=120)
+        frame.columnconfigure(1, weight=10)
         frame.pack(fill="both", padx=10)
 
     def validate(self):
