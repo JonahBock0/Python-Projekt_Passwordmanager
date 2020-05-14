@@ -8,6 +8,8 @@ def entry_from_string(from_string: str):
     notes = "\n".join(lines[4:4 + notes_lines])
     attributes = dict()
     attribute_lines = lines[4 + notes_lines:]
+    if len(attribute_lines) % 2 > 0:  # Bei ungerader Anzahl leere Zeile hinzufügen
+        attribute_lines.append("")
     for i in range(0, len(attribute_lines), 2):
         attributes[attribute_lines[i]] = attribute_lines[i + 1]
     return name, user, password, notes, attributes
