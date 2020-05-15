@@ -386,7 +386,7 @@ class Gui:
 # noinspection PyAttributeOutsideInit
 class Passwordgenerator(simpledialog.Dialog):
     def body(self, master):
-        self.title("Passwortmanager")
+        self.title("Passwortgenerator")
         self.length = StringVar(value="12")
         self.exclude = StringVar(value="")
         self.punctuation = BooleanVar(value=True)
